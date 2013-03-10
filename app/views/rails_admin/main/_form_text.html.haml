@@ -2,10 +2,10 @@
   if field.ckeditor
     richtext = 'ckeditor'
     js_data = {
-      :jspath => field.ckeditor_location ? field.ckeditor_location : field.ckeditor_base_location + "ckeditor.js",
+      :jspath => field.ckeditor_location,
       :base_location => field.ckeditor_base_location,
-      :options => {
-        :customConfig => field.ckeditor_config_js ? field.ckeditor_config_js : field.ckeditor_base_location + "config.js"
+      :options => { 
+        :customConfig => field.ckeditor_config_js
       }
     }
   elsif field.codemirror
@@ -15,13 +15,6 @@
       :jspath => field.codemirror_js_location,
       :options => field.codemirror_config,
       :locations => field.codemirror_assets
-    }
-  elsif field.bootstrap_wysihtml5
-    richtext = 'bootstrap-wysihtml5'
-    js_data = {
-      :csspath => field.bootstrap_wysihtml5_css_location,
-      :jspath => field.bootstrap_wysihtml5_js_location,
-      :config_options => field.bootstrap_wysihtml5_config_options.to_json
     }
   else
     richtext = false

@@ -1,11 +1,12 @@
 en:
-  admin:
-    home:
-      name: "Home"
+  home:
+    name: Home
+  views:
     pagination:
       previous: "&laquo; Prev"
       next: "Next &raquo;"
       truncate: "…"
+  admin:
     misc:
       filter_date_format: "mm/dd/yy" # a combination of 'dd', 'mm' and 'yy' with any delimiter. No other interpolation will be done!
       search: "Search"
@@ -22,7 +23,6 @@ en:
       up: "Up"
       down: "Down"
       navigation: "Navigation"
-      navigation_static_label: "Links"
       log_out: "Log out"
       ago: "ago"
     flash:
@@ -78,6 +78,16 @@ en:
         menu: "Multiple delete"
         breadcrumb: "Multiple delete"
         bulk_link: "Delete selected %{model_label_plural}"
+      merge_items:
+        title: "Merge %{model_label_plural}"
+        menu: "Multiple Merge"
+        breadcrumb: "Multiple Merge"
+        bulk_link: "Merge selected %{model_label_plural}"
+      moderate:
+        title: "Moderate %{model_label_plural}"
+        menu: "Multiple Moderate"
+        breadcrumb: "Multiple Moderate"
+        bulk_link: "Mark selected %{model_label_plural} as Moderated"
       export:
         title: "Export %{model_label_plural}"
         menu: "Export"
@@ -109,6 +119,8 @@ en:
       confirmation: "Yes, I'm sure"
       bulk_delete: "The following objects will be deleted, which may delete or orphan some of their related dependencies:"
       new_model: "%{name} (new)"
+      merge_items: "The following Items will be merged into two items"
+      merge_tags: "The following Tags will be merged into one tag"
     export:
       confirmation: "Export to %{name}"
       select: "Select fields to export"

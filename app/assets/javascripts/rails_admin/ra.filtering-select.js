@@ -40,7 +40,7 @@
         }).toArray();
       }
       var filtering_select = $('<div class="input-append filtering-select" style="float:left"></div>')
-      var input = this.input = $('<input type="text">')
+      var input = this.input = $('<input type="search">')
         .val(value)
         .addClass("ra-filtering-select-input")
         .attr('style', select.attr('style'))
@@ -83,7 +83,7 @@
         .keyup(function() {
           /* Clear select options and trigger change if selected item is deleted */
           if ($(this).val().length == 0) {
-            select.html($('<option value="" selected="selected"></option>'));
+            select.empty();
             select.trigger("change");
           }
         })

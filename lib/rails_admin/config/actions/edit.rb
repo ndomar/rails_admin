@@ -16,26 +16,39 @@ module RailsAdmin
           Proc.new do
 
             if request.get? # EDIT
-
+                 puts "$$$" *100 
+              puts @object.to_s
+              puts @object.tags.size
+              @object.tags.each do |obj|
+                obj = obj.full_class
+              end
+              puts @object.tags.to_s
+              raise @object.to_s
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }
               end
 
             elsif request.put? # UPDATE
-              satisfy_strong_params!
-              sanitize_params_for!(request.xhr? ? :modal : :update)
 
+              @cached_assocations_hash = associations_hash
+              @modified_assoc = []
+
+              @old_object = @object.dup
+           
+
+              sanitize_params_for! :update
+              
               @object.set_attributes(params[@abstract_model.param_key], _attr_accessible_role)
               @authorization_adapter && @authorization_adapter.attributes_for(:update, @abstract_model).each do |name, value|
                 @object.send("#{name}=", value)
               end
-              changes = @object.changes
+
               if @object.save
-                @auditing_adapter && @auditing_adapter.update_object(@object, @abstract_model, _current_user, changes)
+                @auditing_adapter && @auditing_adapter.update_object(@abstract_model, @object, @cached_assocations_hash, associations_hash, @modified_assoc, @old_object, _current_user)
                 respond_to do |format|
                   format.html { redirect_to_on_success }
-                  format.js { render :json => { :id => @object.id.to_s, :label => @model_config.with(:object => @object).object_label } }
+                  format.js { render :json => { :id => @object.id, :label => @model_config.with(:object => @object).object_label } }
                 end
               else
                 handle_save_error :edit

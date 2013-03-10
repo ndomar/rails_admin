@@ -60,11 +60,7 @@ module RailsAdmin
       end
 
       register_instance_option :label_plural do
-        (@label_plural ||= {})[::I18n.locale] ||= abstract_model.model.model_name.human(:count => 'other', :default => label.pluralize)
-      end
-
-      def pluralize(count)
-        count == 1 ? label : label_plural
+        (@label_plural ||= {})[::I18n.locale] ||= abstract_model.model.model_name.human(:count => 2, :default => label.pluralize)
       end
 
       register_instance_option :weight do
@@ -86,23 +82,6 @@ module RailsAdmin
       # store the configurations.
       def method_missing(m, *args, &block)
         self.send(:base).send(m, *args, &block)
-      end
-
-      def inspect
-        "#<#{self.class.name}[#{abstract_model.model.name}] #{
-          instance_variables.map do |v|
-            value = instance_variable_get(v)
-            if [:@parent, :@root].include? v
-              if value.respond_to? :name
-                "#{v}=#{value.name.inspect}"
-              else
-                "#{v}=#{value.class.name}"
-              end
-            else
-              "#{v}=#{value.inspect}"
-            end
-          end.join(", ")
-        }>"
       end
     end
   end

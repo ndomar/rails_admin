@@ -13,14 +13,17 @@ module RailsAdmin
         end
 
         register_instance_option :controller do
+          puts "LOOOOOOOOOOOOOOOOOOOOOOOOOOOL"
+          @omar = "lol"
           Proc.new do
             @history = @auditing_adapter && @auditing_adapter.latest || []
             if @action.statistics?
               @abstract_models = RailsAdmin::Config.visible_models(:controller => self).map(&:abstract_model)
-
+              @omar = "lol"
               @most_recent_changes = {}
               @count = {}
               @max = 0
+              puts @xyz
               @abstract_models.each do |t|
                 scope = @authorization_adapter && @authorization_adapter.query(:index, t)
                 current_count = t.count({}, scope)
@@ -31,7 +34,10 @@ module RailsAdmin
                 end
               end
             end
-            render @action.template_name, :status => (flash[:error].present? ? :not_found : 200)
+
+ @omar = "lol"
+puts @action.template_name
+            render "empty"
           end
         end
 

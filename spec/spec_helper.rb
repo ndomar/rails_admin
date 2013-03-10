@@ -46,23 +46,18 @@ Devise.setup do |config|
 end
 
 RSpec.configure do |config|
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
+  require 'rspec/expectations'
 
   config.include RSpec::Matchers
   config.include RailsAdmin::Engine.routes.url_helpers
 
   config.include Warden::Test::Helpers
 
-  config.include Capybara::DSL, type: :request
-
   config.before(:each) do
     DatabaseCleaner.start
     RailsAdmin::Config.reset
     RailsAdmin::AbstractModel.reset
     RailsAdmin::Config.audit_with(:history) if CI_ORM == :active_record
-    RailsAdmin::Config.yell_for_non_accessible_fields = false
     login_as User.create(
       :email => "username@example.com",
       :password => "password"

@@ -5,14 +5,13 @@ module RailsAdmin
 
     include RailsAdmin::I18nSupport
 
-    def authorized?(action, abstract_model = nil, object = nil)
-      object = nil if object.try :new_record?
-      @authorization_adapter.nil? || @authorization_adapter.authorized?(action, abstract_model, object)
+    def authorized?(*args)
+      @authorization_adapter.nil? || @authorization_adapter.authorized?(*args)
     end
 
     def current_action?(action, abstract_model = @abstract_model, object = @object)
-      @action.custom_key == action.custom_key &&
-      abstract_model.try(:to_param) == @abstract_model.try(:to_param) &&
+      @action.custom_key == action.custom_key && 
+      abstract_model.try(:to_param) == @abstract_model.try(:to_param) && 
       (@object.try(:persisted?) ? @object.id == object.try(:id) : !object.try(:persisted?))
     end
 
@@ -31,13 +30,6 @@ module RailsAdmin
       link_to _current_user.email, url_for(:action => edit_action.action_name, :model_name => abstract_model.to_param, :id => _current_user.id, :controller => 'rails_admin/main')
     end
 
-    def logout_path
-      if defined?(Devise)
-        scope = Devise::Mapping.find_scope!(_current_user)
-        main_app.send("destroy_#{scope}_session_path") rescue false
-      end
-    end
-
     def wording_for(label, action = @action, abstract_model = @abstract_model, object = @object)
       model_config = abstract_model.try(:config)
       object = abstract_model && object.is_a?(abstract_model.model) ? object : nil
@@ -51,63 +43,50 @@ module RailsAdmin
     end
 
     def main_navigation
-      nodes_stack = RailsAdmin::Config.visible_models(:controller => self.controller)
-      node_model_names = nodes_stack.map{ |c| c.abstract_model.model_name }
-
+      nodes_stack = RailsAdmin::Config.visible_models(:controller => self.controller)      
       nodes_stack.group_by(&:navigation_label).map do |navigation_label, nodes|
 
-        nodes = nodes.select{ |n| n.parent.nil? || !n.parent.to_s.in?(node_model_names) }
-        li_stack = navigation nodes_stack, nodes
-
-        label = navigation_label || t('admin.misc.navigation')
-        %{<li class='nav-header'>#{label}</li>#{li_stack}} if li_stack.present?
+        %{<li class='nav-header'>#{navigation_label || t('admin.misc.navigation')}</li>}.html_safe +
+        nodes.select{|n| n.parent.nil? || !n.parent.to_s.in?(nodes_stack.map{|c| c.abstract_model.model_name }) }.map do |node|
+          %{
+            <li data-model="#{node.abstract_model.to_param}">
+              <a class="pjax" href="#{url_for(:action => :index, :controller => 'rails_admin/main', :model_name => node.abstract_model.to_param)}">#{node.label_plural}</a>
+            </li>
+            #{navigation(nodes_stack, nodes_stack.select{|n| n.parent.to_s == node.abstract_model.model_name}, 1)}
+          }.html_safe
+        end.join.html_safe
       end.join.html_safe
     end
 
-    def static_navigation
-      li_stack = RailsAdmin::Config.navigation_static_links.map do |title, url|
-        content_tag(:li, link_to(title.to_s, url, :target => '_blank'))
-      end.join
-
-      label = RailsAdmin::Config.navigation_static_label || t('admin.misc.navigation_static_label')
-      li_stack = %{<li class='nav-header'>#{label}</li>#{li_stack}}.html_safe if li_stack.present?
-      li_stack
-    end
-
-    def navigation nodes_stack, nodes, level=0
+    def navigation nodes_stack, nodes, level
       nodes.map do |node|
-        model_param = node.abstract_model.to_param
-        url         = url_for(:action => :index, :controller => 'rails_admin/main', :model_name => model_param)
-        level_class = " nav-level-#{level}" if level > 0
-
-        li = content_tag :li, "data-model"=>model_param do
-          link_to node.label_plural, url, :class => "pjax#{level_class}"
-        end
-        li + navigation(nodes_stack, nodes_stack.select{ |n| n.parent.to_s == node.abstract_model.model_name}, level+1)
-      end.join.html_safe
+        %{
+          <li data-model="#{node.abstract_model.to_param}">
+            <a class="pjax nav-level-#{level}" href="#{url_for(:action => :index, :controller => 'rails_admin/main', :model_name => node.abstract_model.to_param)}">#{node.label_plural}</a>
+          </li>
+          #{navigation(nodes_stack, nodes_stack.select{ |n| n.parent.to_s == node.abstract_model.model_name}, level + 1)}
+        }.html_safe
+      end.join
     end
 
     def breadcrumb action = @action, acc = []
       begin
         (parent_actions ||= []) << action
       end while action.breadcrumb_parent && (action = action(*action.breadcrumb_parent))
+      parent_actions << action(:dashboard) if parent_actions.last.key != :dashboard # in case chain is interrupted
 
       content_tag(:ul, :class => "breadcrumb") do
         parent_actions.map do |a|
           am = a.send(:eval, 'bindings[:abstract_model]')
           o = a.send(:eval, 'bindings[:object]')
-          content_tag(:li, :class => current_action?(a, am, o) && "active") do
-            crumb = if a.http_methods.include?(:get)
-              link_to url_for(:action => a.action_name, :controller => 'rails_admin/main', :model_name => am.try(:to_param), :id => (o.try(:persisted?) && o.try(:id) || nil)), :class => 'pjax' do
-                wording_for(:breadcrumb, a, am, o)
-              end
+          content_tag(:li, :class => "#{"active" if current_action?(a, am, o)}") do
+            if a.http_methods.include?(:get)
+              link_to wording_for(:breadcrumb, a, am, o), { :action => a.action_name, :controller => 'rails_admin/main', :model_name => am.try(:to_param), :id => (o.try(:persisted?) && o.try(:id) || nil) }, :class => 'pjax'
             else
               content_tag(:span, wording_for(:breadcrumb, a, am, o))
             end
-            crumb+= content_tag(:span, '/', :class => 'divider') unless current_action?(a, am, o)
-            crumb
           end
-        end.reverse.join().html_safe
+        end.reverse.join('<span class="divider">/</span>').html_safe
       end
     end
 
@@ -118,7 +97,7 @@ module RailsAdmin
         wording = wording_for(:menu, action)
         %{
           <li title="#{wording if only_icon}" rel="#{'tooltip' if only_icon}" class="icon #{action.key}_#{parent}_link #{'active' if current_action?(action)}">
-            <a class="#{action.pjax? ? 'pjax' : ''}" href="#{url_for({ :action => action.action_name, :controller => 'rails_admin/main', :model_name => abstract_model.try(:to_param), :id => (object.try(:persisted?) && object.try(:id) || nil) })}">
+            <a class="#{action.key == :show_in_app ? '' : 'pjax'}" href="#{url_for({ :action => action.action_name, :controller => 'rails_admin/main', :model_name => abstract_model.try(:to_param), :id => (object.try(:persisted?) && object.try(:id) || nil) })}">
               <i class="#{action.link_icon}"></i>
               <span#{only_icon ? " style='display:none'" : ""}>#{wording}</span>
             </a>
@@ -139,9 +118,8 @@ module RailsAdmin
             end
           end.join.html_safe
         end
-      end.html_safe
+      end
     end
-
   end
 end
 

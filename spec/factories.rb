@@ -68,8 +68,4 @@ FactoryGirl.define do
   factory :hardball do
     color('blue')
   end
-
-  factory :image do
-    file File.open(Rails.root.join('public', 'robots.txt'))
-  end
 end

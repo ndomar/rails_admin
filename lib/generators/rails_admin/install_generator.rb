@@ -20,7 +20,7 @@ module RailsAdmin
       routes = File.open(Rails.root.join("config/routes.rb")).try :read
       initializer = (File.open(Rails.root.join("config/initializers/rails_admin.rb")) rescue nil).try :read
 
-      display "Hello, RailsAdmin installer will help you set things up!", :blue
+      display "Hello, RailsAdmin installer will help you sets things up!", :blue
       display "I need to work with Devise, let's look at a few things first:"
       display "Checking for a current installation of devise..."
       unless defined?(Devise)
@@ -37,17 +37,13 @@ module RailsAdmin
         display "Looks like you've already installed it, good!"
       end
 
-      namespace = ask_for("Where do you want to mount rails_admin?", "admin", _namespace)
-      gsub_file "config/routes.rb", /mount RailsAdmin::Engine => \'\/.+\', :as => \'rails_admin\'/, ''
-      route("mount RailsAdmin::Engine => '/#{namespace}', :as => 'rails_admin'")
-
       unless routes.index("devise_for")
         model_name = ask_for("What would you like the user model to be called?", "user", _model_name)
         display "Now setting up devise with user model name '#{model_name}':"
         generate "devise", model_name
       else
         display "And you already set it up, good! We just need to know about your user model name..."
-        guess = routes.match(/devise_for +:(\w+)/)[1].try(:singularize)
+        guess = routes.match(/devise_for :(\w+)/)[1].try(:singularize)
         display("We found '#{guess}' (should be one of 'user', 'admin', etc.)")
         model_name = ask_for("Correct Devise model name if needed.", guess, _model_name)
         unless guess == model_name
@@ -79,6 +75,9 @@ module RailsAdmin
       end
       display "Adding a migration..."
       migration_template 'migration.rb', 'db/migrate/create_rails_admin_histories_table.rb' rescue display $!.message
+      namespace = ask_for("Where do you want to mount rails_admin?", "admin", _namespace)
+      gsub_file "config/routes.rb", /mount RailsAdmin::Engine => \'\/.+\', :as => \'rails_admin\'/, ''
+      route("mount RailsAdmin::Engine => '/#{namespace}', :as => 'rails_admin'")
       display "Job's done: migrate, start your server and visit '/#{namespace}'!", :blue
     end
   end

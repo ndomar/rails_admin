@@ -1,3 +1,6 @@
+require Rails.root.join('lib/maintenance', 'item_merger.rb')
+require Rails.root.join('lib/maintenance', 'tags.rb')
+require Rails.root.join('lib', 'association_manager.rb')
 module RailsAdmin
 
   class MainController < RailsAdmin::ApplicationController
@@ -5,6 +8,9 @@ module RailsAdmin
     include ActionView::Helpers::TextHelper
     include RailsAdmin::MainHelper
     include RailsAdmin::ApplicationHelper
+    include Maintenance::ItemMerger
+    include Maintenance::Tags
+
 
     layout :get_layout
 
@@ -18,18 +24,32 @@ module RailsAdmin
           action = RailsAdmin::Config::Actions.find('#{action.action_name}'.to_sym)
           @authorization_adapter.try(:authorize, action.authorization_key, @abstract_model, @object)
           @action = action.with({:controller => self, :abstract_model => @abstract_model, :object => @object})
-          @page_name = wording_for(:title)
+          @page_name = "OMAR NADA!"
+          puts action.action_name
+          puts  request.fullpath
+          @xyz = "==================================================================================="
 
           instance_eval &@action.controller
         end
       }
     end
 
+    def replace_and_merge tagname1, tagname2
+      Maintenance::Tags.replace_and_merge(tagname1, tagname2)
+    end
+    def bulk_moderate items
+      puts "^^" * 100
+      items.each do |item|
+        puts "@@" * 100
+        item.mark_moderated
+      end 
+    end
+
     def bulk_action
       self.send(params[:bulk_action]) if params[:bulk_action].in?(RailsAdmin::Config::Actions.all(:controller => self, :abstract_model => @abstract_model).select(&:bulkable?).map(&:route_fragment))
     end
 
-    def list_entries(model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all] || params[:bulk_ids]))
+    def list_entries(model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
       scope = model_config.abstract_model.scoped
       if auth_scope = @authorization_adapter && @authorization_adapter.query(auth_scope_key, model_config.abstract_model)
         scope = scope.merge(auth_scope)
@@ -40,7 +60,7 @@ module RailsAdmin
     end
 
     private
-
+    
     def get_layout
       "rails_admin/#{request.headers['X-PJAX'] ? 'pjax' : 'application'}"
     end
@@ -87,20 +107,11 @@ module RailsAdmin
       end
     end
 
-    def satisfy_strong_params!
-      if @abstract_model.model.ancestors.map(&:to_s).include?('ActiveModel::ForbiddenAttributesProtection')
-        params[@abstract_model.param_key].try :permit!
-      end
-    end
-
     def sanitize_params_for!(action, model_config = @model_config, _params = params[@abstract_model.param_key])
       return unless _params.present?
-      fields = model_config.send(action).with(:controller => self, :view => self.view_context, :object => @object).visible_fields
-      allowed_methods = fields.map{|f|
-        f.allowed_methods
-      }.flatten.uniq.map(&:to_s) << "id" << "_destroy"
-      fields.each {|f| f.parse_input(_params) }
-      _params.slice!(*allowed_methods)
+      fields = model_config.send(action).fields
+      fields.select{ |f| f.respond_to?(:parse_input) }.each {|f| f.parse_input(_params) }
+
       fields.select(&:nested_form).each do |association|
         children_params = association.multiple? ? _params[association.method_name].try(:values) : [_params[association.method_name]].compact
         (children_params || []).each do |children_param|
@@ -122,7 +133,7 @@ module RailsAdmin
     end
 
     def check_for_cancel
-      if params[:_continue] || (params[:bulk_action] && !params[:bulk_ids])
+      if params[:_continue]
         redirect_to(back_or_index, :flash => { :info => t("admin.flash.noaction") })
       end
     end
@@ -130,15 +141,21 @@ module RailsAdmin
     def get_collection(model_config, scope, pagination)
       associations = model_config.list.fields.select {|f| f.type == :belongs_to_association && !f.polymorphic? }.map {|f| f.association[:name] }
       options = {}
-      options = options.merge(:page => (params[Kaminari.config.param_name] || 1).to_i, :per => (params[:per] || model_config.list.items_per_page)) if pagination
+      options = options.merge(:page => (params[:page] || 1).to_i, :per => (params[:per] || model_config.list.items_per_page)) if pagination
       options = options.merge(:include => associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
       options = options.merge(:query => params[:query]) if params[:query].present?
+      puts "*" *30 + "filters" 
+      puts params[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
-
       objects = model_config.abstract_model.all(options, scope)
     end
+
+    def custom
+    @omar = "Omar Nada"
+    end
+
 
     def get_association_scope_from_params
       return nil unless params[:associated_collection].present?
@@ -148,6 +165,17 @@ module RailsAdmin
       action = params[:current_action].in?(['create', 'update']) ? params[:current_action] : 'edit'
       @association = source_model_config.send(action).fields.find{|f| f.name == params[:associated_collection].to_sym }.with(:controller => self, :object => source_object)
       @association.associated_collection_scope
+    end
+
+    def associations_hash
+      associations = {}
+      @abstract_model.associations.each do |association|
+        if [:has_many, :has_and_belongs_to_many].include?(association[:type])
+          records = Array(@object.send(association[:name]))
+          associations[association[:name]] = records.collect(&:id)
+        end
+      end
+      associations
     end
   end
 end

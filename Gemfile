@@ -1,59 +1,76 @@
 source 'https://rubygems.org'
 
+# Bundle gems for the local environment. Make sure to
+# put test-only gems in this group so their generators
+# and rake tasks are available in development mode:
 group :active_record do
   platforms :jruby do
     case ENV['CI_DB_ADAPTER']
     when 'mysql'
-      gem 'activerecord-jdbcmysql-adapter', '>= 1.2'
-      gem 'jdbc-mysql', '>= 5.1'
+      gem 'activerecord-jdbcmysql-adapter', '~> 1.2'
+      gem 'jdbc-mysql', '~> 5.1'
     when 'postgresql'
-      gem 'activerecord-jdbcpostgresql-adapter', '>= 1.2'
-      gem 'jdbc-postgres', '>= 9.2'
+      gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2'
+      gem 'jdbc-postgres', '~> 9.0'
     else
-      gem 'activerecord-jdbcsqlite3-adapter', '>= 1.2'
-      gem 'jdbc-sqlite3', '>= 3.7'
+      gem 'activerecord-jdbcsqlite3-adapter', '~> 1.2'
+      gem 'jdbc-sqlite3', '~> 3.6'
     end
   end
 
   platforms :ruby, :mswin, :mingw do
     case ENV['CI_DB_ADAPTER']
     when 'mysql'
-      gem 'mysql', '~> 2.8.1'
+      gem 'mysql', '~> 2.8'
     when 'postgresql'
-      gem 'pg', '>= 0.14'
+      gem 'pg', '~> 0.13'
     else
-      gem 'sqlite3', '>= 1.3'
+      gem 'sqlite3', '~> 1.3'
     end
   end
+  gem 'carrierwave'
 end
 
 group :mongoid do
-  gem 'mongoid', '>= 3.0'
-  gem 'mongoid-paperclip', '>= 0.0.8', :require => 'mongoid_paperclip'
-  gem 'carrierwave-mongoid', '>= 0.4', :require => 'carrierwave/mongoid'
+  gem 'bson_ext', :platforms => [:ruby, :mswin, :mingw]
+  case ENV['CI_ORM_VERSION']
+  when 'head'
+    gem 'mongoid', :git => 'git://github.com/mongoid/mongoid.git'
+    gem 'mongoid-paperclip', :require => 'mongoid_paperclip', :git => 'git://github.com/mshibuya/mongoid-paperclip.git', :branch => 'fix-stop-patching-logger'
+    # For now, carrierwave-mongoid's mongoid dependency is restricted to '~> 2.1'
+    gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid', :git => 'git://github.com/tanordheim/carrierwave-mongoid.git', :branch => 'mongoid_3_0'
+    gem 'database_cleaner', :git => 'git://github.com/potatosalad/database_cleaner.git'
+  else
+    gem 'mongoid'
+    gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
+    gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+  end
 end
 
-group :development do
-  gem 'pry', '>= 0.9'
-  gem 'pry-debugger', '>= 0.2', :platforms => :mri_19
+group :debug do
+  platform :mri_18 do
+    gem 'ruby-debug'
+    gem 'linecache'
+  end
+
+  platform :mri_19 do
+    gem 'ruby-debug19'
+    gem 'simplecov', :require => false
+  end
+
+  platform :jruby do
+    gem 'ruby-debug'
+  end
 end
 
-group :test do
-  gem 'cancan', '>= 1.6'
-  gem 'capybara', '1.1'
-  gem 'carrierwave', '>= 0.8'
-  gem 'database_cleaner', '>= 0.8'
-  gem 'devise', '>= 2.1'
-  gem 'dragonfly', '>= 0.9'
-  gem 'factory_girl', '>= 4.2'
-  gem 'generator_spec', '>= 0.8'
-  gem 'launchy', '>= 2.2'
-  gem 'mini_magick', '>= 3.4'
-  gem 'paperclip', '>= 3.4'
-  gem 'rspec-rails', '>= 2.11'
-  gem 'simplecov', :require => false
-  gem 'strong_parameters', '>= 0.1.6'
-  gem 'timecop', '>= 0.5'
+platforms :jruby, :mingw_18, :ruby_18 do
+  gem 'fastercsv', '~> 1.5'
+end
+
+group :development, :test do
+  gem 'cancan'
+  gem 'devise'
+  gem 'paperclip', '~> 2.7'
 end
 
 gemspec

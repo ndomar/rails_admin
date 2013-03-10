@@ -12,11 +12,11 @@ describe "RailsAdmin Basic Destroy" do
       @player = RailsAdmin::AbstractModel.new("Player").first
     end
 
-    it "destroys an object" do
-      expect(@player).to be_nil
+    it "should destroy an object" do
+      @player.should be_nil
     end
 
-    it "shows success message" do
+    it "should show success message" do
       should have_content('Player successfully deleted')
     end
   end
@@ -29,11 +29,11 @@ describe "RailsAdmin Basic Destroy" do
       click_button "Yes, I'm sure"
     end
 
-    it "does not destroy an object" do
-      expect(@player.reload).to be
+    it "should not destroy an object" do
+      @player.reload.should be
     end
 
-    it "shows error message" do
+    it "should show error message" do
       should have_content('Player failed to be deleted')
     end
   end
@@ -46,39 +46,19 @@ describe "RailsAdmin Basic Destroy" do
       @player = RailsAdmin::AbstractModel.new("Player").first
     end
 
-    it "does not destroy an object" do
-      expect(@player).to be
+    it "should not destroy an object" do
+      @player.should be
     end
   end
 
   describe "destroy with missing object" do
     before(:each) do
-      delete delete_path(:model_name => "player", :id => 1)
+      page.driver.delete(delete_path(:model_name => "player", :id => 1))
     end
 
-    it "raises NotFound" do
-      expect(response.code).to eq("404")
-    end
-  end
-
-  describe "destroy from show page" do
-    it "redirects to the index instead of trying to show the deleted object" do
-      @player = FactoryGirl.create :player
-      visit show_path(:model_name => 'player', :id => @player.id)
-      click_link "Delete"
-      click_button "Yes, I'm sure"
-
-      expect(URI.parse(page.current_url).path).to eq(index_path(:model_name => 'player'))
-    end
-
-    it "redirects back to the object on error" do
-      Player.any_instance.stub(:destroy_hook).and_return false
-      @player = FactoryGirl.create :player
-      visit show_path(:model_name => 'player', :id => @player.id)
-      click_link "Delete"
-      click_button "Yes, I'm sure"
-
-      expect(URI.parse(page.current_url).path).to eq(show_path(:model_name => 'player', :id => @player.id))
+    it "should raise NotFound" do
+      page.driver.status_code.should eql(404)
     end
   end
+
 end

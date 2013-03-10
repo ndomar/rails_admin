@@ -4,8 +4,7 @@ require 'rails_admin/adapters/active_record/abstract_object'
 module RailsAdmin
   module Adapters
     module ActiveRecord
-      DISABLED_COLUMN_TYPES = [:tsvector, :blob, :binary, :spatial, :hstore, :geometry]
-      DISABLED_COLUMN_MATCHERS = [/_array$/]
+      DISABLED_COLUMN_TYPES = [:tsvector, :blob, :binary, :spatial, :hstore]
 
       def ar_adapter
         Rails.configuration.database_configuration[Rails.env]['adapter']
@@ -81,22 +80,25 @@ module RailsAdmin
       end
 
       def properties
-        columns = model.columns.reject do |c|
-          c.type.blank? || DISABLED_COLUMN_TYPES.include?(c.type.to_sym) || DISABLED_COLUMN_MATCHERS.any? {|matcher| matcher.match(c.type.to_s)}
-        end
+        columns = model.columns.reject {|c| c.type.blank? || DISABLED_COLUMN_TYPES.include?(c.type.to_sym) }
         columns.map do |property|
           {
             :name => property.name.to_sym,
             :pretty_name => property.name.to_s.tr('_', ' ').capitalize,
+            :type => property.type,
             :length => property.limit,
             :nullable? => property.null,
             :serial? => property.primary,
-          }.merge(type_lookup(property))
+          }
         end
       end
 
       def table_name
         model.table_name
+      end
+
+      def serialized_attributes
+        model.serialized_attributes.keys
       end
 
       def encoding
@@ -105,10 +107,6 @@ module RailsAdmin
 
       def embedded?
         false
-      end
-
-      def adapter_supports_joins?
-        true
       end
 
       private
@@ -175,53 +173,24 @@ module RailsAdmin
         when :boolean
           return ["(#{column} IS NULL OR #{column} = ?)", false] if ['false', 'f', '0'].include?(value)
           return ["(#{column} = ?)", true] if ['true', 't', '1'].include?(value)
-        when :integer, :decimal, :float
-          case value
-          when Array then
-            val, range_begin, range_end = *value.map do |v|
-              if (v.to_i.to_s == v || v.to_f.to_s == v)
-                type == :integer ? v.to_i : v.to_f
-              else
-                nil
-              end
-            end
-            case operator
-            when 'between'
-              if range_begin && range_end
-                ["(#{column} BETWEEN ? AND ?)", range_begin, range_end]
-              elsif range_begin
-                ["(#{column} >= ?)", range_begin]
-              elsif range_end
-                ["(#{column} <= ?)", range_end]
-              end
-            else
-              ["(#{column} = ?)", val] if val
-            end
-          else
-            if value.to_i.to_s == value || value.to_f.to_s == value
-              type == :integer ? ["(#{column} = ?)", value.to_i] : ["(#{column} = ?)", value.to_f]
-            else
-              nil
-            end
-          end
-        when :belongs_to_association
+        when :integer, :belongs_to_association
           return if value.blank?
           ["(#{column} = ?)", value.to_i] if value.to_i.to_s == value
         when :string, :text
           return if value.blank?
           value = case operator
           when 'default', 'like'
-            "%#{value.downcase}%"
+            "%#{value}%"
           when 'starts_with'
-            "#{value.downcase}%"
+            "#{value}%"
           when 'ends_with'
-            "%#{value.downcase}"
+            "%#{value}"
           when 'is', '='
-            "#{value.downcase}"
+            "#{value}"
           else
             return
           end
-          ["(LOWER(#{column}) #{like_operator} ?)", value]
+          ["(#{column} #{like_operator} ?)", value]
         when :date
           start_date, end_date = get_filtering_duration(operator, value)
 
@@ -248,17 +217,9 @@ module RailsAdmin
         end
       end
 
-      def type_lookup(property)
-        if model.serialized_attributes[property.name.to_s]
-          {:type => :serialized}
-        else
-          {:type => property.type}
-        end
-      end
-
       def association_model_lookup(association)
         if association.options[:polymorphic]
-          RailsAdmin::AbstractModel.polymorphic_parents(:active_record, self.model.model_name, association.name) || []
+          RailsAdmin::AbstractModel.polymorphic_parents(:active_record, association.name) || []
         else
           association.klass
         end

@@ -7,40 +7,42 @@ describe "RailsAdmin Basic List" do
   subject { page }
 
   describe "GET /admin" do
-    it "responds successfully" do
+    it "should respond successfully" do
       visit dashboard_path
     end
   end
 
   describe "GET /admin/typo" do
-    it "redirects to dashboard and inform the user the model wasn't found" do
+    it "should redirect to dashboard and inform the user the model wasn't found" do
       visit '/admin/whatever'
-      expect(page.driver.status_code).to eq(404)
-      expect(find('.alert-error')).to have_content("Model 'Whatever' could not be found")
+      page.driver.status_code.should eql(404)
+      find('.alert-error').should have_content("Model 'Whatever' could not be found")
     end
   end
 
   describe "GET /admin/balls/545-typo" do
-    it "redirects to balls index and inform the user the id wasn't found" do
+    it "should redirect to balls index and inform the user the id wasn't found" do
       visit '/admin/ball/545-typo'
-      expect(page.driver.status_code).to eq(404)
-      expect(find('.alert-error')).to have_content("Ball with id '545-typo' could not be found")
+      page.driver.status_code.should eql(404)
+      find('.alert-error').should have_content("Ball with id '545-typo' could not be found")
     end
   end
 
   describe "GET /admin/player as list" do
-    it "shows \"List of Models\", should show filters and should show column headers" do
-      RailsAdmin.config.default_items_per_page = 1
-      2.times { FactoryGirl.create :player } # two pages of players
+    before do
+      21.times { FactoryGirl.create :player } # two pages of players
       visit index_path(:model_name => "player")
+    end
+
+    it "should show \"List of Models\", should show filters and should show column headers" do
       should have_content("List of Players")
       should have_content("Created at")
       should have_content("Updated at")
 
       # it "shows the show, edit and delete links" do
-      should have_selector("li[title='Show'] a")
-      should have_selector("li[title='Edit'] a")
-      should have_selector("li[title='Delete'] a")
+      should have_selector("td a", :text => 'Show')
+      should have_selector("td a", :text => 'Edit')
+      should have_selector("td a", :text => 'Delete')
 
       # it "has the search box with some prompt text" do
       should have_selector("input[placeholder='Filter']")
@@ -48,7 +50,7 @@ describe "RailsAdmin Basic List" do
       # https://github.com/sferik/rails_admin/issues/362
       # test that no link uses the "wildcard route" with the main
       # controller and list method
-      # it "does not use the 'wildcard route'" do
+      # it "should not use the 'wildcard route'" do
       should have_selector("a[href*='all=true']") # make sure we're fully testing pagination
       should have_no_selector("a[href^='/rails_admin/main/list']")
     end
@@ -56,6 +58,14 @@ describe "RailsAdmin Basic List" do
 
   describe "GET /admin/player" do
     before do
+      RailsAdmin.config Player do
+        list do
+          field :name
+          field :team
+          field :injured
+          field :retired
+        end
+      end
       @teams = 2.times.map do
         FactoryGirl.create(:team)
       end
@@ -67,16 +77,7 @@ describe "RailsAdmin Basic List" do
       ]
     end
 
-    it "allows to query on any attribute" do
-      RailsAdmin.config Player do
-        list do
-          field :name
-          field :team
-          field :injured
-          field :retired
-        end
-      end
-
+    it "should allow to query on any attribute" do
       visit index_path(:model_name => "player", :query => @players[0].name)
       should have_content(@players[0].name)
       (1..3).each do |i|
@@ -84,16 +85,7 @@ describe "RailsAdmin Basic List" do
       end
     end
 
-    it "allows to filter on one attribute" do
-      RailsAdmin.config Player do
-        list do
-          field :name
-          field :team
-          field :injured
-          field :retired
-        end
-      end
-
+    it "should allow to filter on one attribute" do
       visit index_path(:model_name => "player", :f => {:injured => {"1" => {:v => "true"}}})
       should have_content(@players[0].name)
       should have_no_content(@players[1].name)
@@ -101,16 +93,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to combine filters on two different attributes" do
-      RailsAdmin.config Player do
-        list do
-          field :name
-          field :team
-          field :injured
-          field :retired
-        end
-      end
-
+    it "should allow to combine filters on two different attributes" do
       visit index_path(:model_name => "player", :f => {:retired => {"1" => {:v => "true"}}, :injured => {"1" => {:v => "true"}}})
       should have_content(@players[0].name)
       (1..3).each do |i|
@@ -118,16 +101,7 @@ describe "RailsAdmin Basic List" do
       end
     end
 
-    it "allows to filter on belongs_to relationships" do
-      RailsAdmin.config Player do
-        list do
-          field :name
-          field :team
-          field :injured
-          field :retired
-        end
-      end
-
+    it "should allow to filter on belongs_to relationships" do
       visit index_path(:model_name => "player", :f => {:team => {"1" => { :v => @teams[0].name }}})
       should have_content(@players[0].name)
       should have_content(@players[1].name)
@@ -135,7 +109,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to disable search on attributes" do
+    it "should allow to disable search on attributes" do
       RailsAdmin.config Player do
         list do
           field :position
@@ -148,7 +122,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[0].name)
     end
 
-    it "allows to search a belongs_to attribute over the base table" do
+    it "should allow to search a belongs_to attribute over the base table" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -166,7 +140,7 @@ describe "RailsAdmin Basic List" do
     end
 
 
-    it "allows to search a belongs_to attribute over the target table" do
+    it "should allow to search a belongs_to attribute over the target table" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -183,7 +157,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to search a belongs_to attribute over the target table with a table name specified as a hash" do
+    it "should allow to search a belongs_to attribute over the target table with a table name specified as a hash" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -200,7 +174,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to search a belongs_to attribute over the target table with a table name specified as a string" do
+    it "should allow to search a belongs_to attribute over the target table with a table name specified as a string" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -217,7 +191,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to search a belongs_to attribute over the label method by default" do
+    it "should allow to search a belongs_to attribute over the label method by default" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -232,7 +206,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to search a belongs_to attribute over the target table when an attribute is specified" do
+    it "should allow to search a belongs_to attribute over the target table when an attribute is specified" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -249,7 +223,7 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "allows to search over more than one attribute" do
+    it "should allow to search over more than one attribute" do
       RailsAdmin.config Player do
         list do
           field PK_COLUMN
@@ -272,16 +246,16 @@ describe "RailsAdmin Basic List" do
       should have_no_content(@players[3].name)
     end
 
-    it "displays base filters when no filters are present in the params" do
+    it "should display base filters when no filters are present in the params" do
       RailsAdmin.config Player do
         list do
           filters [:name, :team]
         end
       end
 
-      get index_path(:model_name => "player")
-      expect(response.body).to include(%{$.filters.append("Name", "name", "string", "", null, "", 1);})
-      expect(response.body).to include(%{$.filters.append("Team", "team", "belongs_to_association", "", null, "", 2);})
+      visit index_path(:model_name => "player")
+      should have_content(%{$.filters.append("Name", "name", "string", null, null, "", 1);})
+      should have_content(%{$.filters.append("Team", "team", "belongs_to_association", null, null, "", 2);})
     end
   end
 
@@ -291,83 +265,75 @@ describe "RailsAdmin Basic List" do
       visit index_path(:model_name => "player")
     end
 
-    it "shows \"2 results\"" do
+    it "should show \"2 results\"" do
       should have_content("2 players")
     end
   end
 
-  describe "GET /admin/player with 2 objects" do
+  describe "GET /admin/player with 20 objects" do
     before(:each) do
-      @players = 2.times.map { FactoryGirl.create :player }
+      @players = 20.times.map { FactoryGirl.create :player }
       visit index_path(:model_name => "player")
     end
 
-    it "shows \"2 results\"" do
-      should have_content("2 players")
+    it "should show \"20 results\"" do
+      should have_content("20 players")
     end
   end
 
-  describe "GET /admin/player with 3 pages, page 2" do
-    before do
-      RailsAdmin.config.default_items_per_page = 1
-      items_per_page = RailsAdmin.config.default_items_per_page
-      (items_per_page * 3).times { FactoryGirl.create(:player) }
-      visit index_path(:model_name => "player", :page => 2)
-    end
-
-    it "paginates correctly" do
-      expect(find('.pagination ul li:first')).to have_content("« Prev")
-      expect(find('.pagination ul li:last')).to have_content("Next »")
-      expect(find('.pagination ul li.active')).to have_content("2")
-    end
-  end
-
-  describe "list with 3 pages, page 3" do
+  describe "GET /admin/player with 20 pages, page 8" do
     before(:each) do
       items_per_page = RailsAdmin.config.default_items_per_page
-      @players = (items_per_page * 3).times.map { FactoryGirl.create(:player) }
-      visit index_path(:model_name => "player", :page => 3)
+      (items_per_page * 20).times { FactoryGirl.create(:player) }
+      visit index_path(:model_name => "player", :page => 8)
     end
 
-    it "paginates correctly and contain the right item" do
-      expect(find('.pagination ul li:first')).to have_content("« Prev")
-      expect(find('.pagination ul li:last')).to have_content("Next »")
-      expect(find('.pagination ul li.active')).to have_content("3")
+    it "should paginate correctly" do
+      find('.pagination ul li:first').should have_content("« Prev")
+      find('.pagination ul li:last').should have_content("Next »")
+      find('.pagination ul li.active').should have_content("8")
+    end
+  end
+
+  describe "list with 20 pages, page 20" do
+    before(:each) do
+      items_per_page = RailsAdmin.config.default_items_per_page
+      @players = (items_per_page * 20).times.map { FactoryGirl.create(:player) }
+      visit index_path(:model_name => "player", :page => 20)
+    end
+
+    it "should paginate correctly and contain the right item" do
+      find('.pagination ul li:first').should have_content("« Prev")
+      find('.pagination ul li:last').should have_content("Next »")
+      find('.pagination ul li.active').should have_content("20")
     end
   end
 
   describe "GET /admin/player show all" do
-    it "responds successfully with a single model" do
-      FactoryGirl.create :player
-      visit index_path(:model_name => "player", :all => true)
-      expect(find('div.total-count')).to have_content("1 player")
-      expect(find('div.total-count')).not_to have_content("1 players")
-    end
-
-    it "responds successfully with multiple models" do
+    it "should respond successfully" do
       2.times.map { FactoryGirl.create :player }
       visit index_path(:model_name => "player", :all => true)
-      expect(find('div.total-count')).to have_content("2 players")
+      find('div.total-count').should have_content("2 players")
     end
   end
 
   describe "GET /admin/player show with pagination disabled by :associated_collection" do
-    it "responds successfully" do
+    it "should respond successfully" do
       @team = FactoryGirl.create :team
       2.times.map { FactoryGirl.create :player, :team => @team }
       visit index_path(:model_name => "player", :associated_collection => "players", :compact => true, :current_action => 'update', :source_abstract_model => 'team', :source_object_id => @team.id)
-      expect(find('div.total-count')).to have_content("2 players")
+      find('div.total-count').should have_content("2 players")
     end
   end
 
   describe "list as compact json" do
-    it "has_content an array with 2 elements and contain an array of elements with keys id and label" do
+    it "should have_content an array with 2 elements and contain an array of elements with keys id and label" do
       2.times.map { FactoryGirl.create :player }
-      get index_path(:model_name => "player", :compact => true, :format => :json)
-      expect(ActiveSupport::JSON.decode(response.body).length).to eq(2)
+      response = page.driver.get(index_path(:model_name => "player", :compact => true, :format => :json))
+      ActiveSupport::JSON.decode(response.body).length.should eql(2)
       ActiveSupport::JSON.decode(response.body).each do |object|
-        expect(object).to have_key("id")
-        expect(object).to have_key("label")
+        object.should have_key("id")
+        object.should have_key("label")
       end
     end
   end
@@ -376,7 +342,7 @@ describe "RailsAdmin Basic List" do
     let(:player) { FactoryGirl.create :player }
 
     before do
-      expect(Player.count).to eq(0)
+      Player.count.should == 0
     end
 
     it "finds the player if the query matches the default search opeartor" do

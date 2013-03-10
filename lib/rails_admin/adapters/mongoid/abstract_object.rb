@@ -6,18 +6,24 @@ module RailsAdmin
         def initialize(object)
           super
           object.associations.each do |name, association|
-            if [:has_many, :references_many].include? association.macro
+            puts "=" * 60
+            puts name 
+            puts association
+            if association == nil
+              puts "EL BTA3A NIL YA BRENS"
+            else
+                          if [:has_many, :references_many].include? association.macro
               instance_eval <<-RUBY, __FILE__, __LINE__ + 1
                 def #{name.to_s.singularize}_ids
                   #{name}.map{|item| item.id }
                 end
 
                 def #{name.to_s.singularize}_ids=(item_ids)
-                  __items__ = Array.wrap(item_ids).map{|item_id| #{name}.klass.find(item_id) rescue nil }.compact
+                  items = Array.wrap(item_ids).map{|item_id| #{name}.klass.find(item_id) rescue nil }.compact
                   if persisted?
-                    #{name}.substitute __items__
+                    #{name}.substitute items
                   else
-                    __items__.each do |item|
+                    items.each do |item|
                       item.update_attribute('#{association.foreign_key}', id)
                     end
                   end
@@ -35,6 +41,9 @@ RUBY
                 end
 RUBY
             end
+            end
+
+
           end
         end
       end

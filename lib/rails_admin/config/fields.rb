@@ -5,7 +5,9 @@ module RailsAdmin
       # association type.
       #
       # @see RailsAdmin::Config::Fields.registry
+      @custom_field
       mattr_reader :default_factory
+      done = false
       @@default_factory = lambda do |parent, properties, fields|
         # If it's an association
         if properties.has_key?(:model_proc)
@@ -14,6 +16,15 @@ module RailsAdmin
         else
           field = RailsAdmin::Config::Fields::Types.load(properties[:type]).new(parent, properties[:name], properties)
         end
+        fields << field
+        if !done
+          done = true
+          properties[:type] = :string
+          properties[:name] = "tagname"
+          properties[:pretty_name] = "Tag Name!!"
+          field =  RailsAdmin::Config::Fields::Types.load(properties[:type]).new(parent, properties[:name], properties)
+          @custom_field = field
+       end
         fields << field
         field
       end
@@ -43,6 +54,14 @@ module RailsAdmin
       # array that will be returned.
       #
       # @see RailsAdmin::Config::Fields.registry
+      def get_field
+        puts "&&" * 100
+        puts "my perfect method called"
+        @custom_field
+      end
+      def is_custom field
+        field == @custom_field
+      end
       def self.factory(parent)
         fields = []
         # Load fields for all properties (columns)
@@ -85,3 +104,4 @@ require 'rails_admin/config/fields/factories/paperclip'
 require 'rails_admin/config/fields/factories/dragonfly'
 require 'rails_admin/config/fields/factories/carrierwave'
 require 'rails_admin/config/fields/factories/association'
+require 'rails_admin/config/fields/factories/serialized'

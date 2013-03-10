@@ -1,35 +1,25 @@
-# RailsAdmin
-[![Gem Version](https://badge.fury.io/rb/rails_admin.png)][gem]
-[![Build Status](https://secure.travis-ci.org/sferik/rails_admin.png?branch=master)][travis]
-[![Dependency Status](https://gemnasium.com/sferik/rails_admin.png?travis)][gemnasium]
-[![Code Climate](https://codeclimate.com/github/sferik/rails_admin.png)][codeclimate]
-[![Pledgie](http://www.pledgie.com/campaigns/15917.png)][pledgie]
-[![Flattr](http://api.flattr.com/button/flattr-badge-large.png)][flattr]
-
-[gem]: https://rubygems.org/gems/rails_admin
-[travis]: http://travis-ci.org/sferik/rails_admin
-[gemnasium]: https://gemnasium.com/sferik/rails_admin
-[codeclimate]: https://codeclimate.com/github/sferik/rails_admin
-[pledgie]: http://www.pledgie.com/campaigns/15917
-[flattr]: http://flattr.com/thing/799416/sferikrailsadmin-on-GitHub
-
+# RailsAdmin [![Build Status](https://secure.travis-ci.org/sferik/rails_admin.png?branch=master)][travis] [![Dependency Status](https://gemnasium.com/sferik/rails_admin.png?travis)][gemnasium] [![Click here to lend your support to: RailsAdmin and make a donation at www.pledgie.com !](https://www.pledgie.com/campaigns/15917.png)][pledgie]
 RailsAdmin is a Rails engine that provides an easy-to-use interface for managing your data.
 
-## Announcements
-### [Action required] Security issue
-`RailsAdmin::Config::Fields::Types::Serialized#parse_input` was unsafe, because it was using the infamous `YAML#load`.
+[travis]: http://travis-ci.org/sferik/rails_admin
+[gemnasium]: https://gemnasium.com/sferik/rails_admin
+[pledgie]: http://www.pledgie.com/campaigns/15917
 
-To fix this, RailsAdmin now uses [safe_yaml](https://github.com/dtao/safe_yaml), with `enable_arbitrary_object_deserialization` and `suppress_warnings` on, for maximum compatibity with all existing apps.
+It started as a port of [MerbAdmin][merb-admin] to Rails 3 and was implemented
+as a [Ruby Summer of Code project][rubysoc] by [Bogdan Gaza][hurrycane] with
+mentors [Erik Michaels-Ober][sferik], [Yehuda Katz][wycats], [Luke van der
+Hoeven][plukevdh], and [Rein Henrichs][reinh].
 
-Incidentally, if you want to load safely YAML in your own app, you can use `YAML.load(something, safe: true)`, since RailsAdmin does not force safe load by default (you might be parsing objects in YAML coming from a safe source).
-
-If you use Serialized with RailsAdmin with non-totally-trusted users, your server is at risk. Update your gem to `> 0.4.3` (should be released any time soon) or to at least this [patched commit](https://github.com/sferik/rails_admin/commit/3cc862d061f541200b93531122f7dac4b1c7a68b) if you use `master~HEAD`
-
-Rails3.0 and other non-maintained branches may be at risk too, I strongly advise against using those any longer.
-
-More information about the whole drama [here](https://github.com/tenderlove/psych/issues/119).
+[merb-admin]: https://github.com/sferik/merb-admin
+[rubysoc]: http://www.rubysoc.org/projects
+[hurrycane]: https://github.com/hurrycane
+[sferik]: https://github.com/sferik
+[wycats]: https://github.com/wycats
+[plukevdh]: https://github.com/plukevdh
+[reinh]: https://github.com/reinh
 
 ## Features
+
 * Display database tables
 * Create new data
 * Easily update data
@@ -46,6 +36,7 @@ More information about the whole drama [here](https://github.com/tenderlove/psyc
   * Mongoid [new]
 
 ## Demo
+
 Take RailsAdmin for a [test drive][demo] with sample data. ([Source code.][dummy_app])
 
 [demo]: http://rails-admin-tb.herokuapp.com/
@@ -59,16 +50,17 @@ In your `Gemfile`, add the following dependencies:
 
 Run:
 
-    bundle install
+    $ bundle install
 
 And then run:
 
-    rails g rails_admin:install
+    $ rails g rails_admin:install
 
 This generator will install RailsAdmin and [Devise](https://github.com/plataformatec/devise) if you
 don't already have it installed. [Devise](https://github.com/plataformatec/devise) is strongly
-recommended to protect your data from anonymous users. Note: If you do not already have [Devise](https://github.com/plataformatec/devise)
-installed, make sure you remove the registerable module from the generated user model.
+recommended to protect your data from anonymous users. Note: If you do not already have [Devise](https://github.com/plataformatec/devise) 
+installed, make sure you remove the registerable module from the generated user model.  
+
 
 It will modify your `config/routes.rb`, adding:
 
@@ -76,42 +68,27 @@ It will modify your `config/routes.rb`, adding:
 mount RailsAdmin::Engine => '/admin', :as => 'rails_admin' # Feel free to change '/admin' to any namespace you need.
 ```
 
-Note: The `devise_for` route must be placed before the mounted engine. The following will generate infinite redirects.
-
-```ruby
-mount RailsAdmin::Engine => '/admin', :as => 'rails_admin'
-devise_for :admins
-```
-
-This will resolve the infinite redirect error:
-
-```ruby
-devise_for :admins
-mount RailsAdmin::Engine => '/rails_admin', :as => 'rails_admin'
-```
-
-See [#715](https://github.com/sferik/rails_admin/issues/715) for more details.
-
 It will also add an intializer that will help you getting started. (head for config/initializers/rails_admin.rb)
 
 Finally run:
 
-    bundle exec rake db:migrate
+    $ bundle exec rake db:migrate
 
 Optionally, you may wish to set up [Cancan](https://github.com/ryanb/cancan),
-[PaperTrail](https://github.com/airblade/paper_trail), [CKeditor](https://github.com/galetahub/ckeditor), [CodeMirror](https://github.com/fixlr/codemirror-rails)
+[PaperTrail](https://github.com/airblade/paper_trail), [CKeditor](https://github.com/galetahub/ckeditor)
 
 More on that in the [Wiki](https://github.com/sferik/rails_admin/wiki)
 
 ## Usage
 Start the server:
 
-    rails server
+    $ rails server
 
 You should now be able to administer your site at
 [http://localhost:3000/admin](http://localhost:3000/admin).
 
 ## Configuration
+
 All configuration documentation has moved to the wiki: https://github.com/sferik/rails_admin/wiki
 
 ## Screenshots
@@ -119,7 +96,7 @@ All configuration documentation has moved to the wiki: https://github.com/sferik
 ![Delete view](https://github.com/sferik/rails_admin/raw/master/screenshots/delete.png "delete view")
 ![List view](https://github.com/sferik/rails_admin/raw/master/screenshots/list.png "list view")
 ![Nested view](https://github.com/sferik/rails_admin/raw/master/screenshots/nested.png "nested view")
-![Polymorphic edit view](https://github.com/sferik/rails_admin/raw/master/screenshots/polymorphic.png "polymorphic view")
+![Polymophic edit view](https://github.com/sferik/rails_admin/raw/master/screenshots/polymorphic.png "polymorphic view")
 
 ## Support
 If you have a question, please check this README, the wiki, and the [list of
@@ -132,14 +109,62 @@ list][list].
 
 [list]: http://groups.google.com/group/rails_admin
 
-If you think you found a bug in RailsAdmin, you can [submit an issue](https://github.com/sferik/rails_admin/issues/new).
+If you think you found a bug in RailsAdmin, you can [submit an issue][issues].
+
+## Contributing
+In the spirit of [free software][free-sw], **everyone** is encouraged to help
+improve this project.
+
+[free-sw]: http://www.fsf.org/licensing/essays/free-sw.html
+
+Here are some ways *you* can contribute:
+
+* by using alpha, beta, and prerelease versions
+* by reporting bugs
+* by suggesting new features
+* by writing or editing documentation
+* by writing specifications
+* by writing code (**no patch is too small**: fix typos, add comments, clean up
+  inconsistent whitespace)
+* by refactoring code
+* by fixing [issues][]
+* by reviewing patches
+* [financially][pledgie]
+
+[issues]: https://github.com/sferik/rails_admin/issues
+
+## Submitting an Issue
+We use the [GitHub issue tracker][issues] to track bugs and features. Before
+submitting a bug report or feature request, check to make sure it hasn't
+already been submitted. When submitting a bug report, please include a [Gist][]
+that includes a stack trace and any details that may be necessary to reproduce
+the bug, including your gem version, Ruby version, and operating system.
+Ideally, a bug report should include a pull request with failing specs.
+
+[gist]: https://gist.github.com/
+
+## Submitting a Pull Request
+1. [Fork the repository.][fork]
+2. [Create a topic branch.][branch]
+3. Add specs for your unimplemented feature or bug fix.
+4. Run `bundle exec rake spec`. If your specs pass, return to step 3.
+5. Implement your feature or bug fix.
+6. Run `bundle exec rake spec`. If your specs fail, return to step 5.
+7. Run `open coverage/index.html`. If your changes are not completely covered
+   by your tests, return to step 3.
+8. Add, commit, and push your changes.
+9. [Submit a pull request.][pr]
+
+[fork]: http://help.github.com/fork-a-repo/
+[branch]: http://learn.github.com/p/branching.html
+[pr]: http://help.github.com/send-pull-requests/
 
 ## Supported Ruby Versions
 This library aims to support and is [tested against][travis] the following Ruby implementations:
 
+* Ruby 1.8.7
 * Ruby 1.9.2
 * Ruby 1.9.3
-* Ruby 2.0.0
 * [Rubinius][]
 * [JRuby][]
 

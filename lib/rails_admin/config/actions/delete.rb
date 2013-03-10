@@ -31,17 +31,14 @@ module RailsAdmin
 
             elsif request.delete? # DESTROY
 
-              redirect_path = nil
-              @auditing_adapter && @auditing_adapter.delete_object(@object, @abstract_model, _current_user)
+              @auditing_adapter && @auditing_adapter.delete_object("Destroyed #{@model_config.with(:object => @object).object_label}", @object, @abstract_model, _current_user)
               if @object.destroy
                 flash[:success] = t("admin.flash.successful", :name => @model_config.label, :action => t("admin.actions.delete.done"))
-                redirect_path = index_path
               else
                 flash[:error] = t("admin.flash.error", :name => @model_config.label, :action => t("admin.actions.delete.done"))
-                redirect_path = back_or_index
               end
 
-              redirect_to redirect_path
+              redirect_to back_or_index
 
             end
           end

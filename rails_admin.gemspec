@@ -33,5 +33,6 @@ Gem::Specification.new do |spec|
   spec.signing_key = File.expand_path("~/.gem/private_key.pem") if $0 =~ /gem\z/
   spec.summary = %q{Admin for Rails}
   spec.test_files = Dir['spec/**/*']
-  spec.version = RailsAdmin::Version
+  #spec.version = RailsAdmin::Version
+  spec.version = '0.0.4'
 end

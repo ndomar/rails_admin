@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'haml', '~> 3.1.1'
   spec.add_dependency 'jquery-rails', '~> 2.0.3'
   #spec.add_dependency 'jquery-ui-rails', '~> 3.0'
-  spec.add_dependency 'kaminari', '~> 0.14'
+  spec.add_dependency 'kaminari', '~> 0.13.1'
   spec.add_dependency 'nested_form', '~> 0.3'
   spec.add_dependency 'rack-pjax', '~> 0.6'
   spec.add_dependency 'rails', '~> 3.1'

@@ -1,7 +1,7 @@
 require 'rails'
 require 'jquery-rails'
 require 'remotipart'
-require 'bootstrap-sass'
+#require 'bootstrap-sass'
 require 'kaminari'
 require 'rack-pjax'
 require 'jquery-ui-rails'

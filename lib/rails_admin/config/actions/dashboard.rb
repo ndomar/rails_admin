@@ -13,13 +13,10 @@ module RailsAdmin
         end
 
         register_instance_option :controller do
-          puts "LOOOOOOOOOOOOOOOOOOOOOOOOOOOL"
-          @omar = "lol"
           Proc.new do
             @history = @auditing_adapter && @auditing_adapter.latest || []
             if @action.statistics?
               @abstract_models = RailsAdmin::Config.visible_models(:controller => self).map(&:abstract_model)
-              @omar = "lol"
               @most_recent_changes = {}
               @count = {}
               @max = 0

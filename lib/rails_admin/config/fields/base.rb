@@ -54,8 +54,6 @@ module RailsAdmin
         end
 
         register_instance_option :searchable do
-          puts "%" * 60
-          puts "registering searchable field for"
           puts self.name
           !virtual? || children_fields.first || false
         end

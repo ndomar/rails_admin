@@ -24,7 +24,7 @@ module RailsAdmin
           action = RailsAdmin::Config::Actions.find('#{action.action_name}'.to_sym)
           @authorization_adapter.try(:authorize, action.authorization_key, @abstract_model, @object)
           @action = action.with({:controller => self, :abstract_model => @abstract_model, :object => @object})
-          @page_name = "OMAR NADA!"
+          @page_name = "Dashboard!"
           puts action.action_name
           puts  request.fullpath
           @xyz = "==================================================================================="
@@ -38,9 +38,7 @@ module RailsAdmin
       Maintenance::Tags.replace_and_merge(tagname1, tagname2)
     end
     def bulk_moderate items
-      puts "^^" * 100
       items.each do |item|
-        puts "@@" * 100
         item.mark_moderated
       end 
     end
@@ -145,16 +143,13 @@ module RailsAdmin
       options = options.merge(:include => associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
       options = options.merge(:query => params[:query]) if params[:query].present?
-      puts "*" *30 + "filters" 
       puts params[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)
     end
 
-    def custom
-    @omar = "Omar Nada"
-    end
+  
 
 
     def get_association_scope_from_params

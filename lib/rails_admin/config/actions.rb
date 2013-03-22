@@ -65,8 +65,6 @@ module RailsAdmin
         end
 
         def register(name, klass = nil)
-          puts "++++++++++++++++++++++++++++ REGISTERING ++++++++++++++++++++++++"
-          puts name
           if klass == nil && name.kind_of?(Class)
             klass = name
             name = klass.to_s.demodulize.underscore.to_sym

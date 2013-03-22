@@ -21,14 +21,11 @@ module RailsAdmin
             if request.post? # BULK DELETE
 
               @objects = list_entries(@model_config, :destroy)
-              puts "===================== OBJECT size IS ===================="
-              puts @objects.size
 
               render @action.template_name
 
             elsif request.delete? # BULK DESTROY
 
-              puts "-=-=-=-=-=-=-=-=-=  CALLED MERGE ITEMS -=-=-=-=-=-==-=-=-=-="
 @objects = list_entries(@model_config, :destroy)
         merge(@objects[0],@objects[1])
 

@@ -16,14 +16,6 @@ module RailsAdmin
           Proc.new do
 
             if request.get? # EDIT
-                 puts "$$$" *100 
-              puts @object.to_s
-              puts @object.tags.size
-              @object.tags.each do |obj|
-                obj = obj.full_class
-              end
-              puts @object.tags.to_s
-              raise @object.to_s
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }

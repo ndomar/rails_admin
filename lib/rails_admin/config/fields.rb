@@ -17,16 +17,6 @@ module RailsAdmin
           field = RailsAdmin::Config::Fields::Types.load(properties[:type]).new(parent, properties[:name], properties)
         end
         fields << field
-        if !done
-          done = true
-          properties[:type] = :string
-          properties[:name] = "tagname"
-          properties[:pretty_name] = "Tag Name!!"
-          field =  RailsAdmin::Config::Fields::Types.load(properties[:type]).new(parent, properties[:name], properties)
-          @custom_field = field
-       end
-        fields << field
-        field
       end
 
       # Registry of field factories.
@@ -55,8 +45,6 @@ module RailsAdmin
       #
       # @see RailsAdmin::Config::Fields.registry
       def get_field
-        puts "&&" * 100
-        puts "my perfect method called"
         @custom_field
       end
       def is_custom field

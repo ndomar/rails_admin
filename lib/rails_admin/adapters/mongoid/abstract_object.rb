@@ -6,11 +6,9 @@ module RailsAdmin
         def initialize(object)
           super
           object.associations.each do |name, association|
-            puts "=" * 60
-            puts name 
-            puts association
+          
             if association == nil
-              puts "EL BTA3A NIL YA BRENS"
+              puts "E"
             else
                           if [:has_many, :references_many].include? association.macro
               instance_eval <<-RUBY, __FILE__, __LINE__ + 1

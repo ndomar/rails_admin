@@ -25,10 +25,6 @@ module RailsAdmin
           @authorization_adapter.try(:authorize, action.authorization_key, @abstract_model, @object)
           @action = action.with({:controller => self, :abstract_model => @abstract_model, :object => @object})
           @page_name = "Dashboard!"
-          puts action.action_name
-          puts  request.fullpath
-          @xyz = "==================================================================================="
-
           instance_eval &@action.controller
         end
       }

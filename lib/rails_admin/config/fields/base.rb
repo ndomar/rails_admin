@@ -52,7 +52,6 @@ module RailsAdmin
         end
 
         register_instance_option :searchable do
-          puts self.name
           !virtual? || children_fields.first || false
         end
 

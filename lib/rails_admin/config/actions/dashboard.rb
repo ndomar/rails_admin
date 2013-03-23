@@ -20,7 +20,6 @@ module RailsAdmin
               @most_recent_changes = {}
               @count = {}
               @max = 0
-              puts @xyz
               @abstract_models.each do |t|
                 scope = @authorization_adapter && @authorization_adapter.query(:index, t)
                 current_count = t.count({}, scope)
@@ -31,9 +30,6 @@ module RailsAdmin
                 end
               end
             end
-
- @omar = "lol"
-puts @action.template_name
             render "empty"
           end
         end

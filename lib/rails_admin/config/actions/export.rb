@@ -19,8 +19,6 @@ module RailsAdmin
               request.format = format
               @schema = params[:schema].symbolize if params[:schema] # to_json and to_xml expect symbols for keys AND values.
               @objects = list_entries(@model_config, :export)
-              puts "EL SIZE YA BRENS"
-              puts @objects.size
               index
             else
               render @action.template_name

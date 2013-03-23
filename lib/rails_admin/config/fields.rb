@@ -17,6 +17,7 @@ module RailsAdmin
           field = RailsAdmin::Config::Fields::Types.load(properties[:type]).new(parent, properties[:name], properties)
         end
         fields << field
+        field
       end
 
       # Registry of field factories.

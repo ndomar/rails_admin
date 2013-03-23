@@ -16,15 +16,9 @@ module RailsAdmin
           Proc.new do
 
             if request.post? # BULK DELETE
-
               @objects = list_entries(@model_config, :destroy)
-
               render @action.template_name
-
             elsif request.delete? # BULK DESTROY
-
-                          puts "-=-=-=-=-=-=-=-=-= ana bad7ak 3aleik -=-=-=-=-=-==-=-=-=-="
-
               redirect_to back_or_index
 
             end

@@ -29,8 +29,6 @@ module RailsAdmin
           puts parent
           puts name
           puts properties
-          puts "^" * 100
-          puts "Init Field"
         end
 
         register_instance_option :css_class do

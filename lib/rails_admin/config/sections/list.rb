@@ -8,11 +8,6 @@ module RailsAdmin
       class List < RailsAdmin::Config::Sections::Base
         include RailsAdmin::Config::Fields
         register_instance_option :filters do
-          puts "-=1" * 100
-          field = get_field
-          puts field
-          @my_custom_field = field
-
           []
         end
 

@@ -96,9 +96,25 @@ module RailsAdmin
         redirect_to new_path(:return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_add_edit]
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
+      elsif params[:_moderate_another]
+        @object.mark_moderated
+        @objects ||= list_entries
+        obj = get_object_index(@objects,@object)
+        redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
         redirect_to back_or_index, :flash => { :success => notice }
       end
+    end
+    def get_object_index my_objects, object
+      i = 0
+      index = -1
+      @objects.each do |obj|
+        if obj.id == object.id
+          index = i + 1
+        end
+        i = i + 1
+      end
+      @objects[index]
     end
 
     def sanitize_params_for!(action, model_config = @model_config, _params = params[@abstract_model.param_key])

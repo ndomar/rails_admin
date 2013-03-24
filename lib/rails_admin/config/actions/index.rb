@@ -27,8 +27,9 @@ module RailsAdmin
 
         register_instance_option :controller do
           Proc.new do
+            puts "INDEX called "
+            puts "*" * 100 
             @objects ||= list_entries
-            @omzey = "ana hena"
 
             respond_to do |format|
 

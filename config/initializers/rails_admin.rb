@@ -27,6 +27,7 @@ RailsAdmin.config do |config|
     edit
     delete
     export
+    show_in_app
     bulk_delete
       merge_tags do
       visible do
@@ -35,7 +36,7 @@ RailsAdmin.config do |config|
     end
      moderate do
       visible do
-        bindings[:abstract_model].model.to_s == "Item"
+        bindings[:abstract_model].model.to_s == "Item" || bindings[:abstract_model].model.to_s == "Tag" || bindings[:abstract_model].model.to_s == "Photo"
       end
     end
 

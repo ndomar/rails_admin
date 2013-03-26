@@ -14,8 +14,8 @@ module RailsAdmin
 
         register_instance_option :controller do
           Proc.new do
-
             if request.get? # EDIT
+              @is_item = (@ojbect.class.to_s == "Item")
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }

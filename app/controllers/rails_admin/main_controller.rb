@@ -35,7 +35,7 @@ module RailsAdmin
     end
     def bulk_moderate items
       items.each do |item|
-        item.mark_moderated
+        item.moderate= true
       end 
     end
 
@@ -97,8 +97,8 @@ module RailsAdmin
       elsif params[:_add_edit]
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
-        @object.mark_moderated
-        @objects ||= list_entries
+        @object.moderate= true
+          @objects ||= list_entries
         obj = get_object_index(@objects,@object)
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else

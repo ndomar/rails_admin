@@ -15,7 +15,16 @@ module RailsAdmin
         register_instance_option :controller do
           Proc.new do
             if request.get? # EDIT
+              puts "&&" * 100
+              puts "params before filter"
+              puts params[:f]
+             # puts @last_filtered_objs.size
+             # puts @objects.size
+              puts @objects
+              puts @filtered_objs
+              puts @filters
               @is_item = (@ojbect.class.to_s == "Item")
+              @is_moderated = true
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }

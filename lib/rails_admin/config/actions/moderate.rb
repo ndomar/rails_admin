@@ -26,7 +26,7 @@ module RailsAdmin
 
             elsif request.delete? # BULK DESTROY
 
-@objects = list_entries(@model_config, :destroy)
+@objects = list_entries(false, @model_config, :destroy)
         bulk_moderate(@objects)
 
                             redirect_to back_or_index

@@ -27,10 +27,8 @@ module RailsAdmin
 
         register_instance_option :controller do
           Proc.new do
-            puts "INDEX called "
-            puts "*" * 100 
-            @objects ||= list_entries
-
+            @objects ||= list_entries(false)
+            @last_filtered_objs = @objects
             respond_to do |format|
 
               format.html do

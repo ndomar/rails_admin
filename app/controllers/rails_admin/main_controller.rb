@@ -17,6 +17,7 @@ module RailsAdmin
     before_filter :get_model, :except => RailsAdmin::Config::Actions.all(:root).map(&:action_name)
     before_filter :get_object, :only => RailsAdmin::Config::Actions.all(:member).map(&:action_name)
     before_filter :check_for_cancel
+    before_filter :persist_objects
 
     RailsAdmin::Config::Actions.all.each do |action|
       class_eval %{
@@ -43,15 +44,40 @@ module RailsAdmin
       self.send(params[:bulk_action]) if params[:bulk_action].in?(RailsAdmin::Config::Actions.all(:controller => self, :abstract_model => @abstract_model).select(&:bulkable?).map(&:route_fragment))
     end
 
-    def list_entries(model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
+  
+    def persist_objects
+      puts "^^" * 100
+
+      puts "persisting objects"
+      puts "lol"
+      puts @objects
+      puts @filtered_objs
+      puts @filters
+      @filtered_objs = @objects
+      if params.has_key?(:f)
+        @filters = params[:f]
+      end
+      puts "filters"
+      puts params[:f]
+      puts @objects
+      puts @filtered_objs
+      puts @filters
+    end
+
+    def list_entries(is_edit, model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
+      puts "%%" * 100
+      puts "Listing Entries"
+      puts is_edit
+      puts params[:f]
       scope = model_config.abstract_model.scoped
       if auth_scope = @authorization_adapter && @authorization_adapter.query(auth_scope_key, model_config.abstract_model)
         scope = scope.merge(auth_scope)
       end
       scope = scope.instance_eval(&additional_scope) if additional_scope
 
-      get_collection(model_config, scope, pagination)
+      get_collection(is_edit, model_config, scope, pagination)
     end
+    
 
     private
     
@@ -62,6 +88,7 @@ module RailsAdmin
     def back_or_index
       params[:return_to].presence && params[:return_to].include?(request.host) && (params[:return_to] != request.fullpath) ? params[:return_to] : index_path
     end
+
 
     def get_sort_hash(model_config)
       abstract_model = model_config.abstract_model
@@ -97,8 +124,11 @@ module RailsAdmin
       elsif params[:_add_edit]
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
-        @object.moderate= true
-          @objects ||= list_entries
+        puts "o" * 100
+        puts "params passed are "
+        puts params[:f]
+        @object.moderate= true  
+          @objects ||= list_entries(true)
         obj = get_object_index(@objects,@object)
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
@@ -148,17 +178,31 @@ module RailsAdmin
       end
     end
 
-    def get_collection(model_config, scope, pagination)
+    def get_collection(is_edit, model_config, scope, pagination)
+      if params.has_key?(:f)
+        session[:filters] = params[:f]
+      end
+      if is_edit
+        puts "EDITING"
+        params[:f] = session[:filters]
+      end
       associations = model_config.list.fields.select {|f| f.type == :belongs_to_association && !f.polymorphic? }.map {|f| f.association[:name] }
       options = {}
       options = options.merge(:page => (params[:page] || 1).to_i, :per => (params[:per] || model_config.list.items_per_page)) if pagination
       options = options.merge(:include => associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
       options = options.merge(:query => params[:query]) if params[:query].present?
+      puts "*** params!" * 100
+      puts @is_moderated
       puts params[:f]
+      puts session[:f]
+      
+      puts session[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)
+      puts objects.size
+      objects
     end
 
   

@@ -18,7 +18,7 @@ module RailsAdmin
             if format = params[:json] && :json || params[:csv] && :csv || params[:xml] && :xml
               request.format = format
               @schema = params[:schema].symbolize if params[:schema] # to_json and to_xml expect symbols for keys AND values.
-              @objects = list_entries(@model_config, :export)
+              @objects = list_entries(false, @model_config, :export)
               index
             else
               render @action.template_name

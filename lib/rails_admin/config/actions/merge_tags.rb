@@ -17,16 +17,11 @@ module RailsAdmin
 
         register_instance_option :controller do
           Proc.new do
-
+            @objects = list_entries(false, @model_config, :destroy)
             if request.post? # BULK DELETE
-
-              @objects = list_entries(@model_config, :destroy)
-
               render @action.template_name
-
             elsif request.delete? # BULK DESTROY
 
-@objects = list_entries(@model_config, :destroy)
         replace_and_merge(@objects[0].tagname,@objects[1].tagname)
 
                             redirect_to back_or_index

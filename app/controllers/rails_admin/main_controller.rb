@@ -74,8 +74,12 @@ module RailsAdmin
         scope = scope.merge(auth_scope)
       end
       scope = scope.instance_eval(&additional_scope) if additional_scope
+      puts "#" * 100
+      puts "Gettign collection"
+      @entries = get_collection(is_edit, model_config, scope, pagination)
+      puts "COLLECTION!"
 
-      get_collection(is_edit, model_config, scope, pagination)
+      @entries
     end
     
 
@@ -196,13 +200,19 @@ module RailsAdmin
       puts @is_moderated
       puts params[:f]
       puts session[:f]
-      
+      puts @model_config.abstract_model
+     @my_hash =  {"tags" => {"tagname" => "Tag 6"}}
+
+     # params[:f] = {"tags" => {"tagname" => "Tag 6"}}
+      puts params[:f]
       puts session[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)
       puts objects.size
-      objects
+      #puts Item.find("tags" => {"tagname" => "Tag 6"}).count
+      #Item.where!(itemname: params[:item_id]).first
+      return objects
     end
 
   

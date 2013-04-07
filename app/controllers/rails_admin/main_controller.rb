@@ -127,8 +127,8 @@ module RailsAdmin
         puts "params passed are "
         puts params[:f] 
         @objects ||= list_entries(true)
+        obj = session["index"]
         @object.moderate= true 
-        obj = get_object_index(@objects,@object)
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
         redirect_to back_or_index, :flash => { :success => notice }
@@ -137,12 +137,19 @@ module RailsAdmin
     def get_object_index my_objects, object
       i = 0
       index = -1
-      @objects.each do |obj|
-        if obj.id == object.id
+      puts "object id is "
+      puts object.id
+      my_objects.each do |obj|
+        puts "other id"
+        puts obj.id
+        if obj.id.to_s.eql? object.id.to_s
           index = i + 1
         end
         i = i + 1
       end
+      puts "888" * 100
+      puts 'returning index'
+      puts index
       @objects[index]
     end
 

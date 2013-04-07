@@ -1,5 +1,5 @@
 - if @is_item 
-  %iframe{:src => "/items/#{@object.to_param}/edit", :height => 400, :width => 800}
+  %iframe{:src => "/items/#{@object.to_param}/edit", :height => 400, :width => '100%'}
 %input{:type => :hidden, :name => 'return_to', :value => (params[:return_to].presence || request.referer)}
 .form-actions
   %button.btn.btn-primary{:type => "submit", :name => "_save", :'data-disable-with' => t("admin.form.save")}

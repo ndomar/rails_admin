@@ -16,6 +16,9 @@ module RailsAdmin
           Proc.new do
             if request.get? # EDIT
               @is_item = (@object.class.to_s == "Item")
+              @objects ||= list_entries(true)
+              index = get_object_index(@objects, @object)
+              session["index"] = index
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }

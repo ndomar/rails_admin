@@ -46,10 +46,7 @@ module RailsAdmin
 
   
     def persist_objects
-      puts "^^" * 100
 
-      puts "persisting objects"
-      puts "lol"
       puts @objects
       puts @filtered_objs
       puts @filters
@@ -65,8 +62,6 @@ module RailsAdmin
     end
 
     def list_entries(is_edit, model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
-      puts "%%" * 100
-      puts "Listing Entries"
       puts is_edit
       puts params[:f]
       scope = model_config.abstract_model.scoped
@@ -130,9 +125,9 @@ module RailsAdmin
       elsif params[:_moderate_another]
         puts "o" * 100
         puts "params passed are "
-        puts params[:f]
-        @object.moderate= true  
-          @objects ||= list_entries(true)
+        puts params[:f] 
+        @objects ||= list_entries(true)
+        @object.moderate= true 
         obj = get_object_index(@objects,@object)
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
@@ -198,10 +193,7 @@ module RailsAdmin
       options = options.merge(:query => params[:query]) if params[:query].present?
       puts "*** params!" * 100
       puts @is_moderated
-      puts params[:f]
-      puts session[:f]
       puts @model_config.abstract_model
-     @my_hash =  {"tags" => {"tagname" => "Tag 6"}}
 
      # params[:f] = {"tags" => {"tagname" => "Tag 6"}}
       puts params[:f]

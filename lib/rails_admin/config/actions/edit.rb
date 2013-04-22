@@ -15,15 +15,10 @@ module RailsAdmin
         register_instance_option :controller do
           Proc.new do
             if request.get? # EDIT
-              puts "^" * 100
-              puts model_config
               @is_item = (@object.class.to_s == "Item")
               @objects ||= list_entries(true)
               index = get_object_index(@objects, @object, model_config)
               session["index"] = index
-              puts "&&" * 100
-              puts "indes is "
-              puts index
               #TO-Do CACHE NEXT OBJECT ID!
               respond_to do |format|
                 format.html { render @action.template_name }

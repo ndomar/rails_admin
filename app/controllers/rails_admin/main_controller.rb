@@ -108,7 +108,7 @@ module RailsAdmin
       elsif params[:_add_edit]
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
-         @objects ||= list_entries(true)
+        @objects ||= list_entries(true)
         obj = @objects[session["index"] - 1]
         @object.moderate= true 
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
@@ -120,7 +120,6 @@ module RailsAdmin
       i = 0
       index = -1
       my_objects.each do |obj|
-        puts obj.name
         if obj.id.to_s.eql? object.id.to_s
           index = i + 1
         end
@@ -175,8 +174,6 @@ module RailsAdmin
         params[:sort] = session[:sort_hash]
         params[:page] = session[:selected_page]
       end
-      puts "ee" * 100
-      puts "page " + params[:page] if params[:page]
       associations = model_config.list.fields.select {|f| f.type == :belongs_to_association && !f.polymorphic? }.map {|f| f.association[:name] }
       options = {}
       #pagination = !is_edit
@@ -184,9 +181,6 @@ module RailsAdmin
       options = options.merge(:include => associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
       options = options.merge(:query => params[:query]) if params[:query].present?
-      puts " filter params"
-      puts "*" * 30
-      puts params[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)

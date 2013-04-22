@@ -35,7 +35,6 @@ module RailsAdmin
       end
 
       def all(options = {},scope=nil)
-        puts options
         ze = Array.new
         scope ||= self.scoped
         scope = scope.includes(options[:include]) if options[:include]
@@ -55,8 +54,6 @@ module RailsAdmin
               y["$and"].each do  |condition|
               if condition.has_key? "created_on"
                 if y["$and"][i]["created_on"].has_key? "$gte"
-                  puts "x" * 30
-                  puts y["$and"][i]["created_on"]["$gte"]
                   time_format_gte = Time.parse (y["$and"][i]["created_on"]["$gte"]).to_s
                   condition["created_on"]["$gte"] = time_format_gte.to_f
                 end

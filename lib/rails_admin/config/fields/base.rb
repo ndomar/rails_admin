@@ -19,16 +19,12 @@ module RailsAdmin
         def initialize(parent, name, properties)
           @parent = parent
           @root = parent.root
-
           @abstract_model = parent.abstract_model
           @defined = false
           @name = name
           @order = 0
           @properties = properties
           @section = parent
-          puts parent
-          puts name
-          puts properties
         end
 
         register_instance_option :css_class do

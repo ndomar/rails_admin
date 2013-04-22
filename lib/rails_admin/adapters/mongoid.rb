@@ -1,6 +1,7 @@
 require 'mongoid'
 require 'rails_admin/config/sections/list'
 require 'rails_admin/adapters/mongoid/abstract_object'
+require 'time'
 
 module RailsAdmin
   module Adapters
@@ -34,17 +35,53 @@ module RailsAdmin
       end
 
       def all(options = {},scope=nil)
+        puts options
+        ze = Array.new
         scope ||= self.scoped
         scope = scope.includes(options[:include]) if options[:include]
         scope = scope.limit(options[:limit]) if options[:limit]
         scope = scope.any_in(:_id => options[:bulk_ids]) if options[:bulk_ids]
-        scope = scope.where(query_conditions(options[:query])) if options[:query]
-        scope = scope.where(filter_conditions(options[:filters])) if options[:filters]
-        if options[:page] && options[:per]
-          scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
-        end
-        scope = sort_by(options, scope) if options[:sort]
-        scope
+        sc = Hash.new
+        fi = Hash.new
+        fi["$gte"] = 3 
+        sc["popularity"] = fi 
+         #scope = scope.where(query_conditions(options[:query])) if options[:query]
+        #scope = scope.where() if options[:filters]
+         y =  filter_conditions(options[:filters]) if options[:filters]
+         mappings = {"created_on" => "created_at"}
+         if options[:filters]
+           if(y["$and"])
+              i = 0
+              y["$and"].each do  |condition|
+              if condition.has_key? "created_on"
+                if y["$and"][i]["created_on"].has_key? "$gte"
+                  puts "x" * 30
+                  puts y["$and"][i]["created_on"]["$gte"]
+                  time_format_gte = Time.parse (y["$and"][i]["created_on"]["$gte"]).to_s
+                  condition["created_on"]["$gte"] = time_format_gte.to_f
+                end
+                if y["$and"][i]["created_on"].has_key? "$lte"
+                  time_format_lte = Time.parse (y["$and"][i]["created_on"]["$lte"]).to_s
+                  condition["created_on"]["$lte"] = time_format_lte.to_f
+                end
+                mapped_condition = Hash[condition.map {|k, v| [mappings[k], v] }]
+                condition = mapped_condition
+              end
+              i = i + 1
+              ze << condition
+              end
+            end
+          end
+          x = filter_conditions(options[:filters]) if options[:filters]
+          if options[:filters]
+            x["$and"] = ze if !ze.empty?
+          end
+          scope = scope.where(x) if options[:filters] && x["$and"] != []
+          if options[:page] && options[:per]
+            scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
+          end
+          scope = sort_by(options, scope) if options[:sort]
+          scope
       end
 
       def count(options = {},scope=nil)

@@ -46,34 +46,19 @@ module RailsAdmin
 
   
     def persist_objects
-
-      puts @objects
-      puts @filtered_objs
-      puts @filters
       @filtered_objs = @objects
       if params.has_key?(:f)
         @filters = params[:f]
       end
-      puts "filters"
-      puts params[:f]
-      puts @objects
-      puts @filtered_objs
-      puts @filters
     end
 
     def list_entries(is_edit, model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
-      puts is_edit
-      puts params[:f]
       scope = model_config.abstract_model.scoped
       if auth_scope = @authorization_adapter && @authorization_adapter.query(auth_scope_key, model_config.abstract_model)
         scope = scope.merge(auth_scope)
       end
       scope = scope.instance_eval(&additional_scope) if additional_scope
-      puts "#" * 100
-      puts "Gettign collection"
       @entries = get_collection(is_edit, model_config, scope, pagination)
-      puts "COLLECTION!"
-
       @entries
     end
     
@@ -123,34 +108,25 @@ module RailsAdmin
       elsif params[:_add_edit]
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
-        puts "o" * 100
-        puts "params passed are "
-        puts params[:f] 
-        @objects ||= list_entries(true)
-        obj = session["index"]
+         @objects ||= list_entries(true)
+        obj = @objects[session["index"]]
         @object.moderate= true 
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
         redirect_to back_or_index, :flash => { :success => notice }
       end
     end
-    def get_object_index my_objects, object
+    def get_object_index my_objects, object, model_config
       i = 0
       index = -1
-      puts "object id is "
-      puts object.id
       my_objects.each do |obj|
-        puts "other id"
-        puts obj.id
+        puts obj.name
         if obj.id.to_s.eql? object.id.to_s
           index = i + 1
         end
         i = i + 1
       end
-      puts "888" * 100
-      puts 'returning index'
-      puts index
-      @objects[index]
+      index
     end
 
     def sanitize_params_for!(action, model_config = @model_config, _params = params[@abstract_model.param_key])
@@ -188,29 +164,32 @@ module RailsAdmin
       if params.has_key?(:f)
         session[:filters] = params[:f]
       end
-      if is_edit
-        puts "EDITING"
-        params[:f] = session[:filters]
+      if params.has_key?(:sort)
+        session[:sort_hash] = params[:sort]
       end
+      if params.has_key?(:page)
+        session[:selected_page] = params[:page]
+      end
+      if is_edit
+        params[:f] = session[:filters]
+        params[:sort] = session[:sort_hash]
+        params[:page] = session[:selected_page]
+      end
+      puts "ee" * 100
+      puts "page " + params[:page] if params[:page]
       associations = model_config.list.fields.select {|f| f.type == :belongs_to_association && !f.polymorphic? }.map {|f| f.association[:name] }
       options = {}
+      #pagination = !is_edit
       options = options.merge(:page => (params[:page] || 1).to_i, :per => (params[:per] || model_config.list.items_per_page)) if pagination
       options = options.merge(:include => associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
       options = options.merge(:query => params[:query]) if params[:query].present?
-      puts "*** params!" * 100
-      puts @is_moderated
-      puts @model_config.abstract_model
-
-     # params[:f] = {"tags" => {"tagname" => "Tag 6"}}
+      puts " filter params"
+      puts "*" * 30
       puts params[:f]
-      puts session[:f]
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)
-      puts objects.size
-      #puts Item.find("tags" => {"tagname" => "Tag 6"}).count
-      #Item.where!(itemname: params[:item_id]).first
       return objects
     end
 

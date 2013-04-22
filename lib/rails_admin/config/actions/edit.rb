@@ -15,10 +15,16 @@ module RailsAdmin
         register_instance_option :controller do
           Proc.new do
             if request.get? # EDIT
+              puts "^" * 100
+              puts model_config
               @is_item = (@object.class.to_s == "Item")
               @objects ||= list_entries(true)
-              index = get_object_index(@objects, @object)
+              index = get_object_index(@objects, @object, model_config)
               session["index"] = index
+              puts "&&" * 100
+              puts "indes is "
+              puts index
+              #TO-Do CACHE NEXT OBJECT ID!
               respond_to do |format|
                 format.html { render @action.template_name }
                 format.js   { render @action.template_name, :layout => false }
@@ -28,12 +34,8 @@ module RailsAdmin
 
               @cached_assocations_hash = associations_hash
               @modified_assoc = []
-
               @old_object = @object.dup
-           
-
               sanitize_params_for! :update
-              
               @object.set_attributes(params[@abstract_model.param_key], _attr_accessible_role)
               @authorization_adapter && @authorization_adapter.attributes_for(:update, @abstract_model).each do |name, value|
                 @object.send("#{name}=", value)

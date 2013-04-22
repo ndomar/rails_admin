@@ -109,7 +109,7 @@ module RailsAdmin
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
          @objects ||= list_entries(true)
-        obj = @objects[session["index"]]
+        obj = @objects[session["index"] - 1]
         @object.moderate= true 
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else

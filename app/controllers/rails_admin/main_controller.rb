@@ -160,8 +160,6 @@ module RailsAdmin
     end
 
     def get_collection(is_edit, model_config, scope, pagination)
-      puts "^^" * 100
-      puts params
       if params.has_key?(:object_type)
         if params[:object_type] != "All"
           search_query = Hash.new

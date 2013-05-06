@@ -21,7 +21,9 @@ module RailsAdmin
               @count = {}
               @max = 0
               @abstract_models.each do |t|
-                scope = @authorization_adapter && @authorization_adapter.query(:index, t)
+                puts "***---" * 100
+                puts t.to_s
+                scope = @authorization_adapter 
                 current_count = t.count({}, scope)
                 @max = current_count > @max ? current_count : @max
                 @count[t.pretty_name] = current_count

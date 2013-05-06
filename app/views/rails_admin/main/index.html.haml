@@ -1,5 +1,25 @@
 :ruby
   require 'rails_admin/config/fields/types/datetime.rb'
+  items = Array.new
+  items[0] = "All"
+  items[1] = "Item"
+  items[2] = "Opinion"
+  items[3] = "Tag"
+  items[4] = "Photo" 
+  reasons = Array.new
+  reasons[0] = "All"
+  reasons[1] = "abusive_language"
+  reasons[2] = "false_information"
+  reasons[3] = "irrelevant"
+  reasons[4] = "duplicated_page" 
+  reasons[5] = "miscategorised"
+  reasons[6] = "nonexistent"
+  reasons[7] = "other"
+  status = Array.new
+  status[0] = "pending"
+  status[1] = "valid"
+  status[2] = "invalid"
+  status[3] = "All"
   query = params[:query]
   params = request.params.except(:authenticity_token, :action, :controller, :utf8, :bulk_export, :_pjax)
   params.delete(:query) if params[:query].blank?
@@ -92,8 +112,28 @@
       = "#list td.#{property.css_class} { max-width: #{property.column_width}px; }"
   = form_tag(index_path(params.except(*%w[page f query])), :method => :get, :class => "pjax-form form-inline") do
 
+  
     .well
       %span#filters_box
+      -if @abstract_model.to_param.to_s.eql? "flag"
+        ="Object Type: "
+        %select{:name => 'object_type'}
+          -items.each do |c|
+            %option{:value=>c, selected: params[:object_type] == c}
+              =h c  
+        <br/>
+        ="Reason: "
+        %select{:name => 'reason'}
+          -reasons.each do |c|
+            %option{:value=>c, selected: params[:reason] == c}
+              =h c 
+        <br/>
+        ="Status: "
+        %select{:name => 'status'}
+          -status.each do |c|
+            %option{:value=>c, selected: params[:status] == c}
+              =h c 
+        <br/>
       %hr.filters_box{:style => "display:#{@ordered_filters.empty? ? 'none' : 'block'}"}
       %input.input-small{:name => "query", :type => "search", :value => query, :placeholder => t("admin.misc.filter")}
       %button.btn.btn-primary{:type => "submit", :'data-disable-with' => "<i class='icon-white icon-refresh'></i> ".html_safe + t("admin.misc.refresh")}

@@ -9,6 +9,7 @@ require 'rails_admin/support/csv_converter'
 require 'rails_admin/support/core_extensions'
 
 module RailsAdmin
+  include CanCan::Ability
   # Setup RailsAdmin
   #
   # Given the first argument is a model class, a model class name

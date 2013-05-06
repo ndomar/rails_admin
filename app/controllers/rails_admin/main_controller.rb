@@ -54,9 +54,9 @@ module RailsAdmin
 
     def list_entries(is_edit, model_config = @model_config, auth_scope_key = :index, additional_scope = get_association_scope_from_params, pagination = !(params[:associated_collection] || params[:all]))
       scope = model_config.abstract_model.scoped
-      if auth_scope = @authorization_adapter && @authorization_adapter.query(auth_scope_key, model_config.abstract_model)
-        scope = scope.merge(auth_scope)
-      end
+   #   if auth_scope = @authorization_adapter && @authorization_adapter.query(:create, model_config.abstract_model)
+    #    scope = scope.merge(auth_scope)
+     # end
       scope = scope.instance_eval(&additional_scope) if additional_scope
       @entries = get_collection(is_edit, model_config, scope, pagination)
       @entries
@@ -109,7 +109,7 @@ module RailsAdmin
         redirect_to edit_path(:id => @object.id, :return_to => params[:return_to]), :flash => { :success => notice }
       elsif params[:_moderate_another]
         @objects ||= list_entries(true)
-        obj = @objects[session["index"] - 1]
+        obj = @objects[session["index"]]
         @object.moderate= true 
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
       else
@@ -160,6 +160,72 @@ module RailsAdmin
     end
 
     def get_collection(is_edit, model_config, scope, pagination)
+      puts "^^" * 100
+      puts params
+      if params.has_key?(:object_type)
+        if params[:object_type] != "All"
+          search_query = Hash.new
+          search_query[:o] = "is"
+          search_query[:v] = params[:object_type]
+          query_hash = Hash.new
+          query_hash["94712"] = search_query
+          if params[:f] != nil
+            params[:f][:object_reported_type] = query_hash
+          else 
+            params[:f] = Hash.new
+            params[:f][:object_reported_type] = query_hash
+          end
+        else
+          if params[:f] != nil
+            params[:f].delete(:object_reported_type)
+          end
+
+        end
+      end
+
+      if params.has_key?(:reason)
+        if params[:reason] != "All"
+          search_query = Hash.new
+          search_query[:o] = "is"
+          search_query[:v] = params[:reason]
+          query_hash = Hash.new
+          query_hash["94722"] = search_query
+          if params[:f] != nil
+            params[:f][:reason] = query_hash
+          else 
+            params[:f] = Hash.new
+            params[:f][:reason] = query_hash
+          end
+        else
+          if params[:f] != nil
+            params[:f].delete(:reason)
+          end
+
+        end
+      end
+
+      if params.has_key?(:status)
+        if params[:status] != "All"
+          search_query = Hash.new
+          search_query[:o] = "is"
+          search_query[:v] = params[:status]
+          query_hash = Hash.new
+          query_hash["94732"] = search_query
+          if params[:f] != nil
+            params[:f][:status] = query_hash
+          else 
+            params[:f] = Hash.new
+            params[:f][:status] = query_hash
+          end
+        else
+          if params[:f] != nil
+            params[:f].delete(:status)
+          end
+
+        end
+      end
+      puts query_hash
+      puts params
       if params.has_key?(:f)
         session[:filters] = params[:f]
       end
@@ -184,6 +250,10 @@ module RailsAdmin
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       objects = model_config.abstract_model.all(options, scope)
+      puts objects.count
+      params[:f].delete(:object_reported_type) if params[:f] != nil
+      params[:f].delete(:reason) if params[:f] != nil
+      params[:f].delete(:status) if params[:f] != nil
       return objects
     end
 

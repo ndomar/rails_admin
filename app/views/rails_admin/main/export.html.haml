@@ -1,6 +1,14 @@
 - params = request.params.except(:action, :controller, :utf8, :page, :per_page, :format, :authenticity_token)
 - visible_fields = @model_config.export.with(:view => self, :object => @abstract_model.model.new).visible_fields
 
+
+- specs = @model_config.export.with(:view => self, :object => @abstract_model.model.new).extract_specs
+
+- specs_fields = @model_config.export.with(:view => self, :object => @abstract_model.model.new).spec_fields specs[0]
+
+
+
+
 = form_tag export_path(params.merge(:all => true)), :method => 'post', :class => 'form-horizontal denser' do
 
   %input{:name => "send_data", :type => "hidden", :value => "true"}/
@@ -8,10 +16,11 @@
     %legend
       %i.icon-chevron-down
       = t('admin.export.select')
+    
     .control-group
       %label.control-label{:rel => 'tooltip', :'data-original-title' => t('admin.export.click_to_reverse_selection'), :onclick => 'jQuery(this).siblings(".controls").find("input").click()'}= t('admin.export.fields_from', :name => @model_config.label_plural.downcase)
       .controls
-        - visible_fields.select{ |f| !f.association? || f.association[:polymorphic] }.each do |field|
+        - visible_fields.select{ |f| !f.spec? }.each do |field|
           - list = field.virtual? ? 'methods' : 'only'
           - if field.association? && field.association[:polymorphic]
             %label.checkbox{:for => "schema_#{list}_#{field.method_name}"}
@@ -26,8 +35,36 @@
               = check_box_tag "schema[#{list}][]", field.name, true, { :id => "schema_#{list}_#{field.name}" }
               = field.label
 
+
+
+    - specs.each do |spec|
+      - spec_fields = @model_config.export.with(:view => self, :object => @abstract_model.model.new).spec_fields spec
+      .control-group
+        %label.control-label{:rel => 'tooltip', :'data-original-title' => t('admin.export.click_to_reverse_selection'), :onclick => 'jQuery(this).siblings(".controls").find("input").click()'}= t('admin.export.fields_from', :name => spec)
+        </br>
+        </br>
+        </br>
+        .controls
+          - spec_fields.select{ |f| !f.association? || f.association[:polymorphic] }.each do |field|
+            - list = field.virtual? ? 'methods' : 'only'
+            - if field.association? && field.association[:polymorphic]
+              %label.checkbox{:for => "schema_#{list}_#{field.method_name}"}
+                = check_box_tag "schema[#{list}][]", field.method_name, true, { :id => "schema_#{list} _#{field.method_name}" }
+                = field.label + " [id]"
+              - polymorphic_type_column_name = @abstract_model.properties.find {|p| field.association[:foreign_type] == p[:name] }[:name]
+              %label.checkbox{:for => "schema_#{list}_#{polymorphic_type_column_name}"}
+                = check_box_tag "schema[#{list}][]", polymorphic_type_column_name, true, { :id => "schema_#{list}_#{polymorphic_type_column_name}" }
+                = field.label + " [type]"
+            - else
+              %label.checkbox{:for => "schema_#{list}_#{field.name}"}
+                = check_box_tag "schema[#{list}][]", field.name, true, { :id => "schema_#{list}_#{field.name}" }
+                = field.label
+
+   
+
+
     - visible_fields.select{ |f| f.association? && !f.association[:polymorphic] }.each do |field|
-      - fields = field.associated_model_config.export.with(:view => self, :object => (associated_model = field.associated_model_config.abstract_model.model).new).visible_fields.select{ |f| !f.association? }
+      - fields = field.associated_model_config.export.with(:view => self, :object => (associated_model = field.associated_model_config.abstract_model.model).new).new_fields.select{ |f| !f.association? }
       .control-group
         %label.control-label{:rel => 'tooltip', :'data-original-title' => t('admin.export.click_to_reverse_selection'), :onclick => 'jQuery(this).siblings(".controls").find("input").click()'}= t('admin.export.fields_from_associated', :name => field.label.downcase)
         .controls

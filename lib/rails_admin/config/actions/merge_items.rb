@@ -19,15 +19,18 @@ module RailsAdmin
           Proc.new do
              @objects = list_entries(false, @model_config, :destroy)
             if request.post? # BULK DELETE
-
+              @merge = true
              
 
               render @action.template_name
 
             elsif request.delete? # BULK DESTROY
-
-        merge(@objects[0],@objects[1])
-
+              puts "##" * 20
+              puts "merge"
+             
+                merge(@objects[0],@objects[1]) if params[:master] == @objects[0].to_s
+                merge(@objects[1],@objects[0]) unless params[:master] == @objects[0].to_s
+              
                             redirect_to back_or_index
 
 

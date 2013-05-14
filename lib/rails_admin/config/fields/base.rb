@@ -111,6 +111,11 @@ module RailsAdmin
           formatted_value.presence || ' - '
         end
 
+                
+        def spec?
+          @name.to_s.include? "\/"
+        end
+
         # output for printing in export view (developers beware: no bindings[:view] and no data!)
         register_instance_option :export_value do
           pretty_value

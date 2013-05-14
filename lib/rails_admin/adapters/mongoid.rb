@@ -46,7 +46,10 @@ module RailsAdmin
         sc["popularity"] = fi 
          #scope = scope.where(query_conditions(options[:query])) if options[:query]
         #scope = scope.where() if options[:filters]
+                  puts "--" * 20
+
          y =  filter_conditions(options[:filters]) if options[:filters]
+         puts y
          mappings = {"created_on" => "created_at"}
          if options[:filters]
            if(y["$and"])
@@ -73,11 +76,50 @@ module RailsAdmin
           if options[:filters]
             x["$and"] = ze if !ze.empty?
           end
-          scope = scope.where(x) if options[:filters] && x["$and"] != []
+          puts x
+          or_filters = options[:or_filters]
+          puts "or filters"
+          puts or_filters
+          or_hash = Hash.new
+          or_conditions = Array.new
+          if or_filters != nil
+            or_filters.each do |o|
+              puts o
+              i = 0
+              options[:filters].each do |filter|
+                puts filter
+                o[0] = o[0][3,o[0].length]
+                puts filter
+                if o[0].eql? filter[0]
+                  puts "found or filter"
+                  puts o[0]
+                  cond_1 = filter_conditions({filter[0] => options[:filters][filter[0]]})
+                  puts cond_1
+                  puts options[:filters][filter[0]]
+                  puts or_filters
+                  puts or_filters["OR " + o[0]]
+                  cond_2 = filter_conditions({o[0] => or_filters["OR " + o[0]]})
+                  puts cond_2
+                  or_conditions[i] = Array.new
+                  or_conditions[i][0] = cond_1
+                  or_conditions[i][1] = cond_2 
+                  i = i + 1
+                  puts "OR CONDITIONS"
+                  puts or_conditions[i - 1]
+                  or_hash["$or"] = Array.new
+                  or_hash["$or"][0] = or_conditions[i - 1][0]["$and"][0]
+                  or_hash["$or"][1] = or_conditions[i - 1][1]["$and"][0]
+                  puts or_hash
+                end
+              end
+            end
+          end
+          scope = scope.where(or_hash) if options[:filters] && x["$and"] != []
           if options[:page] && options[:per]
             scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
           end
           scope = sort_by(options, scope) if options[:sort]
+          puts scope
           scope
       end
 

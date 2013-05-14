@@ -76,6 +76,21 @@
   - if @filterable_fields.present?
     %li.dropdown{:style => 'float:right'}
       %a.dropdown-toggle{:href => '#', :'data-toggle' => "dropdown"}
+        = "Add Second Filter"
+        %b.caret
+      %ul.dropdown-menu#filters{:style => 'left:auto; right:0;'}
+        - @filterable_fields.each do |field|
+          - field_options = case field.type
+          - when :enum
+            - options_for_select(field.with(:object => @abstract_model.model.new).enum)
+          - else
+            - ''
+          %li
+            %a{:href => '#', :"data-field-label" => "OR #{field.label}", :"data-field-name" =>  "OR #{field.name}", :"data-field-options" => field_options.html_safe, :"data-field-type" => field.type, :"data-field-value" => ""}= field.label
+
+  - if @filterable_fields.present?
+    %li.dropdown{:style => 'float:right'}
+      %a.dropdown-toggle{:href => '#', :'data-toggle' => "dropdown"}
         = t('admin.misc.add_filter')
         %b.caret
       %ul.dropdown-menu#filters{:style => 'left:auto; right:0;'}
@@ -87,6 +102,8 @@
             - ''
           %li
             %a{:href => '#', :"data-field-label" => field.label, :"data-field-name" => field.name, :"data-field-options" => field_options.html_safe, :"data-field-type" => field.type, :"data-field-value" => ""}= field.label
+
+
 
 #list
   %script
@@ -112,6 +129,10 @@
       = "#list td.#{property.css_class} { max-width: #{property.column_width}px; }"
   = form_tag(index_path(params.except(*%w[page f query])), :method => :get, :class => "pjax-form form-inline") do
 
+
+    .well
+      %span#filters_box_2
+      %hr.filters_box_2{:style => "display:#{@ordered_filters.empty? ? 'none' : 'block'}"}
   
     .well
       %span#filters_box

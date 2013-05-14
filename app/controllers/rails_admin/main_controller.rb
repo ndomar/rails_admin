@@ -160,6 +160,18 @@ module RailsAdmin
     end
 
     def get_collection(is_edit, model_config, scope, pagination)
+      puts "**" * 20
+      puts "parameters"
+      puts params[:f]
+      or_filters = Hash.new
+      if params[:f] != nil
+      params[:f].each  do |param|
+        puts param[0]
+        or_filters[param[0]] = param[1] if param[0].start_with? "OR"
+        params[:f].delete param[0] if param[0].start_with? "OR"
+      end
+    end
+      puts or_filters
       if params.has_key?(:object_type)
         if params[:object_type] != "All"
           search_query = Hash.new
@@ -247,6 +259,7 @@ module RailsAdmin
       options = options.merge(:query => params[:query]) if params[:query].present?
       options = options.merge(:filters => params[:f]) if params[:f].present?
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
+      options = options.merge(:or_filters => or_filters)
       objects = model_config.abstract_model.all(options, scope)
       puts objects.count
       params[:f].delete(:object_reported_type) if params[:f] != nil

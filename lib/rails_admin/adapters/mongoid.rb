@@ -119,7 +119,6 @@ module RailsAdmin
             scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
           end
           scope = sort_by(options, scope) if options[:sort]
-          puts scope
           scope
       end
 

@@ -82,39 +82,39 @@ module RailsAdmin
           puts or_filters
           or_hash = Hash.new
           or_conditions = Array.new
-          if or_filters != nil
-            or_filters.each do |o|
-              puts o
-              i = 0
-              options[:filters].each do |filter|
-                puts filter
-                o[0] = o[0][3,o[0].length]
-                puts filter
-                if o[0].eql? filter[0]
-                  puts "found or filter"
-                  puts o[0]
-                  cond_1 = filter_conditions({filter[0] => options[:filters][filter[0]]})
-                  puts cond_1
-                  puts options[:filters][filter[0]]
-                  puts or_filters
-                  puts or_filters["OR " + o[0]]
-                  cond_2 = filter_conditions({o[0] => or_filters["OR " + o[0]]})
-                  puts cond_2
-                  or_conditions[i] = Array.new
-                  or_conditions[i][0] = cond_1
-                  or_conditions[i][1] = cond_2 
-                  i = i + 1
-                  puts "OR CONDITIONS"
-                  puts or_conditions[i - 1]
-                  or_hash["$or"] = Array.new
-                  or_hash["$or"][0] = or_conditions[i - 1][0]["$and"][0]
-                  or_hash["$or"][1] = or_conditions[i - 1][1]["$and"][0]
-                  puts or_hash
-                end
-              end
+         second_filter = Hash.new
+         second_filter["$and"] = Array.new
+         if or_filters != nil
+          i = 0
+          or_filters.each do |o|
+            puts o
+            o[0] = o[0][3,o[0].length]
+            condition = filter_conditions({o[0] => or_filters["OR " + o[0]]})
+            puts "CONDITION"
+            puts condition
+            condition["$and"].each do |c|
+              second_filter["$and"][i] = c
+              i = i + 1
             end
+
+            #or_hash["$or"][i] = condition["$and"][0]
           end
-          scope = scope.where(or_hash) if options[:filters] && x["$and"] != []
+         end
+         puts "first filter"
+         puts x
+         puts "second filter"
+         puts second_filter
+         full_filter = Array.new
+         if x != nil
+          full_filter[0] = x if x["$and"] != [] && options[:filters]
+        end
+        if second_filter != nil
+         full_filter[1] = second_filter if second_filter["$and"] != [] && options[:or_filters]
+       end
+         final = Hash.new
+         final["$or"] = full_filter
+         puts final
+          scope = scope.where(final) if final["$or"] != []
           if options[:page] && options[:per]
             scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
           end

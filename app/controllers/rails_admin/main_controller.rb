@@ -261,10 +261,10 @@ module RailsAdmin
       options = options.merge(:bulk_ids => params[:bulk_ids]) if params[:bulk_ids]
       options = options.merge(:or_filters => or_filters)
       objects = model_config.abstract_model.all(options, scope)
-      puts objects.count
       params[:f].delete(:object_reported_type) if params[:f] != nil
       params[:f].delete(:reason) if params[:f] != nil
       params[:f].delete(:status) if params[:f] != nil
+     # params[:f].merge(:or_filters) if :or_filters.present?
       return objects
     end
 

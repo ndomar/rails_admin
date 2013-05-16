@@ -44,12 +44,8 @@ module RailsAdmin
         fi = Hash.new
         fi["$gte"] = 3 
         sc["popularity"] = fi 
-         #scope = scope.where(query_conditions(options[:query])) if options[:query]
-        #scope = scope.where() if options[:filters]
-                  puts "--" * 20
 
          y =  filter_conditions(options[:filters]) if options[:filters]
-         puts y
          mappings = {"created_on" => "created_at"}
          if options[:filters]
            if(y["$and"])
@@ -76,10 +72,7 @@ module RailsAdmin
           if options[:filters]
             x["$and"] = ze if !ze.empty?
           end
-          puts x
           or_filters = options[:or_filters]
-          puts "or filters"
-          puts or_filters
           or_hash = Hash.new
           or_conditions = Array.new
          second_filter = Hash.new
@@ -87,11 +80,8 @@ module RailsAdmin
          if or_filters != nil
           i = 0
           or_filters.each do |o|
-            puts o
             o[0] = o[0][3,o[0].length]
             condition = filter_conditions({o[0] => or_filters["OR " + o[0]]})
-            puts "CONDITION"
-            puts condition
             condition["$and"].each do |c|
               second_filter["$and"][i] = c
               i = i + 1
@@ -100,10 +90,7 @@ module RailsAdmin
             #or_hash["$or"][i] = condition["$and"][0]
           end
          end
-         puts "first filter"
-         puts x
-         puts "second filter"
-         puts second_filter
+
          full_filter = Array.new
          if x != nil
           full_filter[0] = x if x["$and"] != [] && options[:filters]
@@ -113,7 +100,6 @@ module RailsAdmin
        end
          final = Hash.new
          final["$or"] = full_filter
-         puts final
           scope = scope.where(final) if final["$or"] != []
           if options[:page] && options[:per]
             scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])

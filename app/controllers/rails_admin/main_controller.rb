@@ -112,6 +112,16 @@ module RailsAdmin
         obj = @objects[session["index"]]
         @object.moderate= true 
         redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
+      elsif params[:_valid_another]
+        @objects ||= list_entries(true)
+        obj = @objects[session["index"]]
+        @object.resolve true 
+        redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice }
+       elsif params[:_invalid_another]
+        @objects ||= list_entries(true)
+        obj = @objects[session["index"]]
+        @object.resolve false 
+        redirect_to edit_path(:id => obj.id, :return_to => params[:return_to]), :flash => { :success => notice } 
       else
         redirect_to back_or_index, :flash => { :success => notice }
       end
@@ -160,9 +170,6 @@ module RailsAdmin
     end
 
     def get_collection(is_edit, model_config, scope, pagination)
-      puts "**" * 20
-      puts "parameters"
-      puts params[:f]
       or_filters = Hash.new
       if params[:f] != nil
       params[:f].each  do |param|

@@ -115,38 +115,29 @@ module RailsAdmin
       end
 
       def extract_specs
-        puts "**" * 10
-        puts "EXTRACTING SPECS"
         fields = visible_fields
         specs = Array.new
         fields.each do |f|
-          puts f.name.to_s
           splitted_specs = f.name.to_s.split("\/")
           specs << splitted_specs[0] if ((splitted_specs.count > 1) && (!specs.include? splitted_specs[0]))
         end
-        puts specs.count
         specs
       end
       
 
       def spec_fields spec
         i = 0
-        puts "*" * 200
-        puts "SPEC FIELDS"
         specs = Array.new
         fields = all_fields.map {|f| f.with(bindings) }.select(&:visible?).sort_by{|f| [f.order, i += 1] } # stable sort, damn
         fields.each do |f|
           splitted_specs = f.name.to_s.split("\/")
           specs << f if splitted_specs[0].to_s == spec.to_s
-          puts splitted_specs[1]
         end
         specs
       end
 
       def new_fields
         i = 0
-        puts "*" * 200
-        puts "NEW FIELDS"
         fields = all_fields.map {|f| f.with(bindings) }.select(&:visible?).sort_by{|f| [f.order, i += 1] } # stable sort, damn
       end
 

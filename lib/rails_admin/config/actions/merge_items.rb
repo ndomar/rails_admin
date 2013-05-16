@@ -25,8 +25,6 @@ module RailsAdmin
               render @action.template_name
 
             elsif request.delete? # BULK DESTROY
-              puts "##" * 20
-              puts "merge"
 
                 merge(@objects[0],@objects[1],{safe: false}) if params[:master] == @objects[0].to_s
                 merge(@objects[1],@objects[0], {safe: false}) unless params[:master] == @objects[0].to_s

@@ -35,19 +35,23 @@ module RailsAdmin
               @authorization_adapter && @authorization_adapter.attributes_for(:update, @abstract_model).each do |name, value|
                 @object.send("#{name}=", value)
               end
-
-              if @object.save
-                @auditing_adapter && @auditing_adapter.update_object(@abstract_model, @object, @cached_assocations_hash, associations_hash, @modified_assoc, @old_object, _current_user)
-                respond_to do |format|
-                  format.html { redirect_to_on_success }
-                  format.js { render :json => { :id => @object.id, :label => @model_config.with(:object => @object).object_label } }
+              if !(params[:_invalid_another] || params[:_valid_another]) 
+                if @object.save
+                  @auditing_adapter && @auditing_adapter.update_object(@abstract_model, @object, @cached_assocations_hash, associations_hash, @modified_assoc, @old_object, _current_user)
+                  respond_to do |format|
+                    format.html { redirect_to_on_success }
+                    format.js { render :json => { :id => @object.id, :label => @model_config.with(:object => @object).object_label } }
+                  end
+                else
+                  handle_save_error :edit
                 end
               else
-                handle_save_error :edit
+                respond_to do |format|
+                    format.html { redirect_to_on_success }
+                    format.js { render :json => { :id => @object.id, :label => @model_config.with(:object => @object).object_label } }
+                  end 
               end
-
             end
-
           end
         end
 

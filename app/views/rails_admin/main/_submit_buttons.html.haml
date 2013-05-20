@@ -10,16 +10,16 @@
       %button.btn.btn-info{:type => "submit", :name => "_add_another", :'data-disable-with' => t("admin.form.save_and_add_another")}
         = t("admin.form.save_and_add_another")
     - if ((authorized? :new, @abstract_model) && (@abstract_model.pretty_name != "Flag"))
-      %button.btn.btn-info{:type => "submit", :name => "_moderate_another", :'data-disable-with' => t("admin.form.save_and_add_another")}
+      %button.btn.btn-info{:type => "submit", :name => "_moderate_another",:value => @abstract_model.pretty_name, :'data-disable-with' => t("admin.form.save_and_add_another")}
         = t("admin.form.moderate_and_moderate_another")
     - if ((authorized? :new, @abstract_model) && (@abstract_model.pretty_name == "Flag"))
-      %button.btn.btn-info{:type => "submit", :name => "_valid_another", :'data-disable-with' => t("admin.form.save_and_add_another")}
+      %button.btn.btn-info{:type => "submit", :name => "_valid_another", :value => @abstract_model.pretty_name, :'data-disable-with' => t("admin.form.save_and_add_another")}
         = "Mark invalid and moderate another"
     - if ((authorized? :new, @abstract_model) && (@abstract_model.pretty_name == "Flag"))
-      %button.btn.btn-info{:type => "submit", :name => "_invalid_another", :'data-disable-with' => t("admin.form.save_and_add_another")}
+      %button.btn.btn-info{:type => "submit", :name => "_invalid_another", :value => @abstract_model.pretty_name, :'data-disable-with' => t("admin.form.save_and_add_another")}
         = "Mark valid and moderate another"
     - if authorized? :edit, @abstract_model
-      %button.btn.btn-info{:type => "submit", :name => "_moderate_another", :'data-disable-with' => t("admin.form.save_and_edit")}
+      %button.btn.btn-info{:type => "submit", :name => "_add_edit", :'data-disable-with' => t("admin.form.save_and_edit")}
         = t("admin.form.save_and_edit")
     %button.btn{:type => "submit", :name => "_continue", :'data-disable-with' => t("admin.form.cancel")}
       %i.icon-remove

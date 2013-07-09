@@ -34,5 +34,5 @@ Gem::Specification.new do |spec|
   spec.summary = %q{Admin for Rails}
   spec.test_files = Dir['spec/**/*']
   #spec.version = RailsAdmin::Version
-  spec.version = '0.1.5'
+  spec.version = '0.1.6'
 end

@@ -8,7 +8,6 @@ module RailsAdmin
     include ActionView::Helpers::TextHelper
     include RailsAdmin::MainHelper
     include RailsAdmin::ApplicationHelper
-    include Maintenance::ItemMerger
     include Maintenance::Tags
 
 

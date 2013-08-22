@@ -6,7 +6,6 @@ module RailsAdmin
     module Actions
       class Moderate < RailsAdmin::Config::Actions::Base
         RailsAdmin::Config::Actions.register(self)
-        include Maintenance::ItemMerger
         register_instance_option :collection do
           true
         end

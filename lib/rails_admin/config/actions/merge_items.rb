@@ -6,7 +6,6 @@ module RailsAdmin
     module Actions
       class MergeItems < RailsAdmin::Config::Actions::Base
         RailsAdmin::Config::Actions.register(self)
-        include Maintenance::ItemMerger
         register_instance_option :collection do
           true
         end
@@ -26,8 +25,8 @@ module RailsAdmin
 
             elsif request.delete? # BULK DESTROY
 
-                merge(@objects[0],@objects[1],{safe: false}) if params[:master] == @objects[0].to_s
-                merge(@objects[1],@objects[0], {safe: false}) unless params[:master] == @objects[0].to_s
+                Maintenance::Items.merge(@objects[0],@objects[1],{safe: false}) if params[:master] == @objects[0].id.to_s
+                Maintenance::Items.merge(@objects[1],@objects[0], {safe: false}) unless params[:master] == @objects[0].id.to_s
               
                             redirect_to back_or_index
 
